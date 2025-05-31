@@ -239,9 +239,9 @@ if page == "Individual Dashboard":
             # Calculate reward based on skor_total percentage
             skor_percent = (skor_total / target_skor * 100) if target_skor != 0 else 0
             if skor_percent >= 100:
-                reward = 600000
+                reward = 650000
             elif 90 <= skor_percent < 100:
-                reward = 400000
+                reward = 450000
             elif 80 <= skor_percent < 90:
                 reward = 300000
             else:
