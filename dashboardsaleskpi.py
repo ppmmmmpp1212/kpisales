@@ -164,7 +164,7 @@ def load_data_from_gsheet():
     url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/gviz/tq?tqx=out:csv&sheet={sheet_name}"
     try:
         df = pd.read_csv(url, parse_dates=["tanggal"])
-        numeric_columns = ['absensi', 'target_sa', 'aktual_sa', 'target_fv', 'aktual_fv', 
+        numeric_columns = ['Cluster','absensi', 'target_sa', 'aktual_sa', 'target_fv', 'aktual_fv', 
                            'total_outlet_bulan', 'jumlah_kunjungan_outlet', 'Target_outletbaru', 
                            'total_outlet_baru', 'skor_total', 'target_skor', 'reward', 
                            '%absen', '%SA', '%VF', '%kunjungan', '%outletbaru']
@@ -235,7 +235,17 @@ if page == "Individual Dashboard":
             outlet_baru = float(row['total_outlet_baru']) if pd.notnull(row['total_outlet_baru']) else 0
             skor_total = float(row['skor_total']) if pd.notnull(row['skor_total']) else 0
             target_skor = float(row['target_skor']) if pd.notnull(row['target_skor']) and float(row['target_skor']) != 0 else 1
-            reward = int(float(str(row['reward']).replace(',', ''))) if pd.notnull(row['reward']) else 0
+            
+            # Calculate reward based on skor_total percentage
+            skor_percent = (skor_total / target_skor * 100) if target_skor != 0 else 0
+            if skor_percent >= 100:
+                reward = 600000
+            elif 90 <= skor_percent < 100:
+                reward = 400000
+            elif 80 <= skor_percent < 90:
+                reward = 300000
+            else:
+                reward = 0
             
             st.markdown("---")
             st.markdown("<h3 style='text-align: center;'>🎯 Pencapaian Parameter</h3>", unsafe_allow_html=True)
