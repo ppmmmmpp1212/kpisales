@@ -194,24 +194,19 @@ with st.sidebar:
     st.title("📈 Sales Performance")
     st.markdown("---")
     
-    # Page selection with Leaderboard as default
-    page = st.selectbox("Select Page", ["Individual Dashboard", "Leaderboard"], index=1)
+    # Page selection with only Individual Dashboard
+    page = "Individual Dashboard"
     
-    if page == "Individual Dashboard":
-        cluster_options = ['All Clusters'] + sorted(df['Cluster'].unique().tolist() if not df.empty else [])
-        selected_cluster = st.selectbox("Filter by Cluster", cluster_options)
-        
-        # Filter sales names based on selected cluster
-        if selected_cluster != 'All Clusters':
-            filtered_df = df[df['Cluster'] == selected_cluster]
-        else:
-            filtered_df = df
-        sales_options = sorted(filtered_df['nama_sales'].unique().tolist() if not filtered_df.empty else [])
-        selected_sales = st.selectbox("Select Sales Person", sales_options if sales_options else ["No data available"])
+    cluster_options = ['All Clusters'] + sorted(df['Cluster'].unique().tolist() if not df.empty else [])
+    selected_cluster = st.selectbox("Filter by Cluster", cluster_options)
     
-    elif page == "Leaderboard":
-        cluster_options = ['All Clusters'] + sorted(df['Cluster'].unique().tolist() if not df.empty else [])
-        selected_cluster = st.selectbox("Filter by Cluster", cluster_options)
+    # Filter sales names based on selected cluster
+    if selected_cluster != 'All Clusters':
+        filtered_df = df[df['Cluster'] == selected_cluster]
+    else:
+        filtered_df = df
+    sales_options = sorted(filtered_df['nama_sales'].unique().tolist() if not filtered_df.empty else [])
+    selected_sales = st.selectbox("Select Sales Person", sales_options if sales_options else ["No data available"])
     
     st.markdown("---")
     st.write(f"**Last Updated:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
@@ -274,62 +269,13 @@ if page == "Individual Dashboard":
             st.write(f"Skor: **{skor_total if pd.notnull(skor_total) else 0}** dari target **{target_skor if pd.notnull(target_skor) else 0}**")
             st.markdown(custom_progress_bar("Total Skor", skor_total, target_skor, emoji="🚶"), unsafe_allow_html=True)
             st.write(f"Reward: **Rp {reward if pd.notnull(reward) else 0:,.0f}**".replace(",", "."))
-            st.markdown(f"📅 Data Tanggal: **{row['tanggal']:%Y-%m-%d if pd.notnull(row['tanggal']) else '-'}**")
+            # Safely format date without assuming datetime object
+            tanggal_str = str(row['tanggal']) if pd.notnull(row['tanggal']) else '-'
+            try:
+                tanggal_dt = pd.to_datetime(tanggal_str)
+                tanggal_formatted = tanggal_dt.strftime('%Y-%m-%d')
+            except (ValueError, TypeError):
+                tanggal_formatted = tanggal_str
+            st.markdown(f"📅 Data Tanggal: **{tanggal_formatted}**")
     else:
         st.warning("No data available for the selected filters.")
-
-elif page == "Leaderboard":
-    st.markdown('<div class="main-title">Sales Leaderboard</div>', unsafe_allow_html=True)
-    
-    # Filter data by cluster
-    if selected_cluster != 'All Clusters':
-        leaderboard_df = df[df['Cluster'] == selected_cluster].copy()
-    else:
-        leaderboard_df = df.copy()
-    
-    if not leaderboard_df.empty:
-        # Handle ranking with raw values
-        leaderboard_df['Rank'] = leaderboard_df['skor_total'].rank(ascending=False, method='min', na_option='bottom')
-        leaderboard_df = leaderboard_df.sort_values('skor_total', ascending=False).reset_index(drop=True)
-        
-        # Select columns for display
-        display_columns = ['Rank', 'tanggal', 'Cluster', 'nama_sales', '%absen', '%SA', '%VF', '%kunjungan', '%outletbaru', 'skor_total']
-        display_columns = [col for col in display_columns if col in leaderboard_df.columns]
-        leaderboard_df = leaderboard_df[display_columns]
-        
-        # Format the dataframe for display using raw values
-        formatted_df = leaderboard_df.copy()
-        formatted_df['tanggal'] = formatted_df['tanggal'].apply(lambda x: x.strftime('%Y-%m-%d') if pd.notnull(x) else '-')
-        # Display percentages as-is, assuming they might be fractions or percentages
-        formatted_df['%absen'] = formatted_df['%absen'].apply(lambda x: f"{x:.2f}%" if pd.notnull(x) else "0.00%")
-        formatted_df['%SA'] = formatted_df['%SA'].apply(lambda x: f"{x:.2f}%" if pd.notnull(x) else "0.00%")
-        formatted_df['%VF'] = formatted_df['%VF'].apply(lambda x: f"{x:.2f}%" if pd.notnull(x) else "0.00%")
-        formatted_df['%kunjungan'] = formatted_df['%kunjungan'].apply(lambda x: f"{x:.2f}%" if pd.notnull(x) else "0.00%")
-        formatted_df['%outletbaru'] = formatted_df['%outletbaru'].apply(lambda x: f"{x:.2f}%" if pd.notnull(x) else "0.00%")
-        formatted_df['skor_total'] = formatted_df['skor_total'].apply(lambda x: f"{x:.2f}" if pd.notnull(x) else "0.00")
-        formatted_df['Rank'] = formatted_df['Rank'].apply(lambda x: int(x) if pd.notnull(x) else 0)
-        
-        # Rename columns for better display
-        formatted_df.columns = ['Rank', 'Tanggal', 'Cluster', 'Nama Sales', '% Absen', '% SA', '% VF', '% Kunjungan', '% Outlet Baru', 'Skor Total']
-        
-        # Display the table in a container
-        with st.container():
-            st.dataframe(
-                formatted_df,
-                use_container_width=True,
-                height=600,
-                column_config={
-                    'Rank': st.column_config.NumberColumn(width="small"),
-                    'Tanggal': st.column_config.TextColumn(width="medium"),
-                    'Cluster': st.column_config.TextColumn(width="medium"),
-                    'Nama Sales': st.column_config.TextColumn(width="medium"),
-                    '% Absen': st.column_config.TextColumn(width="small"),
-                    '% SA': st.column_config.TextColumn(width="small"),
-                    '% VF': st.column_config.TextColumn(width="small"),
-                    '% Kunjungan': st.column_config.TextColumn(width="small"),
-                    '% Outlet Baru': st.column_config.TextColumn(width="small"),
-                    'Skor Total': st.column_config.TextColumn(width="small")
-                }
-            )
-    else:
-        st.warning("No data available for the selected cluster.")
