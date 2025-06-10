@@ -184,9 +184,11 @@ def load_data_from_gsheet():
         ]
         for col in numeric_columns:
             if col in df.columns:
-                df[col] = pd.to_numeric(df[col], errors='coerce').fillna(0)
-                # Replace inf with 0
-                df[col] = df[col].replace([np.inf, -np.inf], 0)
+                df[col] = pd.to_numeric(df[col], errors='coerce')
+                # Replace NaN with 0 and inf with 0
+                df[col] = df[col].fillna(0).replace([np.inf, -np.inf], 0)
+        # Debug: Display first few rows to verify data
+        st.write("Raw Data Sample:", df.head())
         return df
     except Exception as e:
         st.error(f"Error loading data: {e}")
@@ -307,6 +309,7 @@ elif page == "Leaderboard":
         # Format the dataframe for display
         formatted_df = leaderboard_df.copy()
         formatted_df['tanggal'] = formatted_df['tanggal'].apply(lambda x: x.strftime('%Y-%m-%d') if pd.notnull(x) else '-')
+        # Adjust percentage columns to handle fractions (0.0-1.0) and convert to percentage (0-100)
         formatted_df['%absen'] = (formatted_df['%absen'] * 100).round(2).apply(lambda x: f"{x:.2f}%")
         formatted_df['%SA'] = (formatted_df['%SA'] * 100).round(2).apply(lambda x: f"{x:.2f}%")
         formatted_df['%VF'] = (formatted_df['%VF'] * 100).round(2).apply(lambda x: f"{x:.2f}%")
