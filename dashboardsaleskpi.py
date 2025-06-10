@@ -262,7 +262,7 @@ if page == "Individual Dashboard":
             
             # Display styled progress info
             st.markdown(styled_progress_info("Skor Total", skor_total, target_skor, "poin"), unsafe_allow_html=True)
-            st.progress(percent_progress)
+       
             
             # Display reward and date
             st.write(f"Reward: **Rp {reward if pd.notnull(reward) else 0:,.0f}**".replace(",", "."))
