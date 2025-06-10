@@ -222,7 +222,7 @@ if page == "Individual Dashboard":
         with st.container():
             st.markdown(sales_scorecard(row['nama_sales'], row['Cluster']), unsafe_allow_html=True)
             
-            # Data Processing
+            # Data Processing with NaN handling
             absensi = float(row['absensi']) if pd.notnull(row['absensi']) else 0
             absen_target = 27
             target_sa = float(row['target_sa']) if pd.notnull(row['target_sa']) and float(row['target_sa']) != 0 else 1
@@ -287,6 +287,8 @@ elif page == "Leaderboard":
         leaderboard_df = df.copy()
     
     if not leaderboard_df.empty:
+        # Handle NaN in skor_total before ranking
+        leaderboard_df['skor_total'] = leaderboard_df['skor_total'].fillna(0)
         # Add rank based on skor_total
         leaderboard_df['Rank'] = leaderboard_df['skor_total'].rank(ascending=False, method='min').astype(int)
         leaderboard_df = leaderboard_df.sort_values('skor_total', ascending=False).reset_index(drop=True)
@@ -298,11 +300,11 @@ elif page == "Leaderboard":
         # Format the dataframe for display
         formatted_df = leaderboard_df.copy()
         formatted_df['tanggal'] = formatted_df['tanggal'].apply(lambda x: x.strftime('%Y-%m-%d') if pd.notnull(x) else '-')
-        formatted_df['%absen'] = (formatted_df['%absen'] * 100).round(2).apply(lambda x: f"{x:.2f}%")
-        formatted_df['%SA'] = (formatted_df['%SA'] * 100).round(2).apply(lambda x: f"{x:.2f}%")
-        formatted_df['%VF'] = (formatted_df['%VF'] * 100).round(2).apply(lambda x: f"{x:.2f}%")
-        formatted_df['%kunjungan'] = (formatted_df['%kunjungan'] * 100).round(2).apply(lambda x: f"{x:.2f}%")
-        formatted_df['%outletbaru'] = (formatted_df['%outletbaru'] * 100).round(2).apply(lambda x: f"{x:.2f}%")
+        formatted_df['%absen'] = (formatted_df['%absen'].fillna(0) * 100).round(2).apply(lambda x: f"{x:.2f}%")
+        formatted_df['%SA'] = (formatted_df['%SA'].fillna(0) * 100).round(2).apply(lambda x: f"{x:.2f}%")
+        formatted_df['%VF'] = (formatted_df['%VF'].fillna(0) * 100).round(2).apply(lambda x: f"{x:.2f}%")
+        formatted_df['%kunjungan'] = (formatted_df['%kunjungan'].fillna(0) * 100).round(2).apply(lambda x: f"{x:.2f}%")
+        formatted_df['%outletbaru'] = (formatted_df['%outletbaru'].fillna(0) * 100).round(2).apply(lambda x: f"{x:.2f}%")
         formatted_df['skor_total'] = formatted_df['skor_total'].apply(lambda x: f"{x:.2f}")
         
         # Rename columns for better display
