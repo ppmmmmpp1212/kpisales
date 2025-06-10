@@ -164,10 +164,22 @@ def load_data_from_gsheet():
     url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/gviz/tq?tqx=out:csv&sheet={sheet_name}"
     try:
         df = pd.read_csv(url, parse_dates=["tanggal"])
-        numeric_columns = ['Cluster', 'absensi', 'target_sa', 'aktual_sa', 'target_fv', 'aktual_fv', 
-                          'total_outlet_bulan', 'jumlah_kunjungan_outlet', 'Target_outletbaru', 
-                          'total_outlet_baru', 'skor_total', 'target_skor', 'reward', 
-                          '%absen', '%SA', '%VF', '%kunjungan', '%outletbaru']
+        # Select only the required columns
+        required_columns = [
+            'tanggal', 'Cluster', 'nama_sales', 'absensi', 'target_absen', '%absen',
+            'target_sa', 'aktual_sa', '%SA', 'target_fv', 'aktual_fv', '%VF',
+            'total_outlet_bulan', 'jumlah_kunjungan_outlet', '%kunjungan',
+            'Target_outletbaru', 'total_outlet_baru', '%outletbaru',
+            'skor_total', 'target_skor', 'reward'
+        ]
+        df = df[required_columns]
+        # Convert numeric columns to appropriate type
+        numeric_columns = [
+            'absensi', 'target_absen', '%absen', 'target_sa', 'aktual_sa', '%SA',
+            'target_fv', 'aktual_fv', '%VF', 'total_outlet_bulan', 'jumlah_kunjungan_outlet',
+            '%kunjungan', 'Target_outletbaru', 'total_outlet_baru', '%outletbaru',
+            'skor_total', 'target_skor', 'reward'
+        ]
         for col in numeric_columns:
             df[col] = pd.to_numeric(df[col], errors='coerce')
         return df
@@ -222,9 +234,9 @@ if page == "Individual Dashboard":
         with st.container():
             st.markdown(sales_scorecard(row['nama_sales'], row['Cluster']), unsafe_allow_html=True)
             
-            # Data Processing with NaN handling
+            # Data Processing
             absensi = float(row['absensi']) if pd.notnull(row['absensi']) else 0
-            absen_target = 27
+            absen_target = float(row['target_absen']) if pd.notnull(row['target_absen']) else 1
             target_sa = float(row['target_sa']) if pd.notnull(row['target_sa']) and float(row['target_sa']) != 0 else 1
             aktual_sa = float(row['aktual_sa']) if pd.notnull(row['aktual_sa']) else 0
             target_fv = float(row['target_fv']) if pd.notnull(row['target_fv']) and float(row['target_fv']) != 0 else 1
@@ -235,17 +247,7 @@ if page == "Individual Dashboard":
             outlet_baru = float(row['total_outlet_baru']) if pd.notnull(row['total_outlet_baru']) else 0
             skor_total = float(row['skor_total']) if pd.notnull(row['skor_total']) else 0
             target_skor = float(row['target_skor']) if pd.notnull(row['target_skor']) and float(row['target_skor']) != 0 else 1
-            
-            # Calculate reward based on skor_total percentage
-            skor_percent = (skor_total / target_skor * 100) if target_skor != 0 else 0
-            if skor_percent >= 100:
-                reward = 650000
-            elif 90 <= skor_percent < 100:
-                reward = 450000
-            elif 80 <= skor_percent < 90:
-                reward = 300000
-            else:
-                reward = 0
+            reward = float(row['reward']) if pd.notnull(row['reward']) else 0
             
             st.markdown("---")
             st.markdown("<h3 style='text-align: center;'>🎯 Pencapaian Parameter</h3>", unsafe_allow_html=True)
@@ -287,11 +289,6 @@ elif page == "Leaderboard":
         leaderboard_df = df.copy()
     
     if not leaderboard_df.empty:
-        # Handle NaN in numeric columns
-        numeric_columns = ['skor_total', '%absen', '%SA', '%VF', '%kunjungan', '%outletbaru']
-        for col in numeric_columns:
-            leaderboard_df[col] = leaderboard_df[col].fillna(0)
-        
         # Add rank based on skor_total
         leaderboard_df['Rank'] = leaderboard_df['skor_total'].rank(ascending=False, method='min').astype(int)
         leaderboard_df = leaderboard_df.sort_values('skor_total', ascending=False).reset_index(drop=True)
@@ -303,13 +300,12 @@ elif page == "Leaderboard":
         # Format the dataframe for display
         formatted_df = leaderboard_df.copy()
         formatted_df['tanggal'] = formatted_df['tanggal'].apply(lambda x: x.strftime('%Y-%m-%d') if pd.notnull(x) else '-')
-        
-        # Format percentage columns
-        for col in ['%absen', '%SA', '%VF', '%kunjungan', '%outletbaru']:
-            formatted_df[col] = formatted_df[col].apply(lambda x: f"{x * 100:.2f}%" if pd.notnull(x) else "0.00%")
-        
-        # Format skor_total
-        formatted_df['skor_total'] = formatted_df['skor_total'].apply(lambda x: f"{x:.2f}" if pd.notnull(x) else "0.00")
+        formatted_df['%absen'] = (formatted_df['%absen'] * 100).round(2).apply(lambda x: f"{x:.2f}%")
+        formatted_df['%SA'] = (formatted_df['%SA'] * 100).round(2).apply(lambda x: f"{x:.2f}%")
+        formatted_df['%VF'] = (formatted_df['%VF'] * 100).round(2).apply(lambda x: f"{x:.2f}%")
+        formatted_df['%kunjungan'] = (formatted_df['%kunjungan'] * 100).round(2).apply(lambda x: f"{x:.2f}%")
+        formatted_df['%outletbaru'] = (formatted_df['%outletbaru'] * 100).round(2).apply(lambda x: f"{x:.2f}%")
+        formatted_df['skor_total'] = formatted_df['skor_total'].apply(lambda x: f"{x:.2f}")
         
         # Rename columns for better display
         formatted_df.columns = ['Rank', 'Tanggal', 'Cluster', 'Nama Sales', '% Absen', '% SA', '% VF', '% Kunjungan', '% Outlet Baru', 'Skor Total']
@@ -333,10 +329,5 @@ elif page == "Leaderboard":
                     'Skor Total': st.column_config.TextColumn(width="small")
                 }
             )
-        
-        # Debugging: Show raw data for inspection
-        with st.expander("Inspect Raw Data"):
-            st.write("Raw Leaderboard Data:")
-            st.dataframe(leaderboard_df)
     else:
         st.warning("No data available for the selected cluster.")
