@@ -179,8 +179,6 @@ def load_data_from_gsheet():
         ]
         available_columns = [col for col in required_columns if col in df.columns]
         df = df[available_columns]
-        # Display raw data for verification
-        st.write("Raw Data Sample:", df.head())
         return df
     except Exception as e:
         st.error(f"Error loading data: {e}")
@@ -266,7 +264,13 @@ if page == "Individual Dashboard":
             st.markdown("---")
             st.markdown("<h3 style='text-align: center;'>🎯 Skor Total & Reward</h3>", unsafe_allow_html=True)
             st.write(f"Skor: **{skor_total if pd.notnull(skor_total) else 0}** dari target **{target_skor if pd.notnull(target_skor) else 0}**")
-            st.markdown(custom_progress_bar("Total Skor", skor_total, target_skor, emoji="🚶"), unsafe_allow_html=True)
+            
+            # Calculate percentage for progress bar
+            skor_num = pd.to_numeric(skor_total, errors='coerce')
+            target_skor_num = pd.to_numeric(target_skor, errors='coerce')
+            percent = min(skor_num / target_skor_num * 100 if target_skor_num and pd.notnull(target_skor_num) and target_skor_num != 0 else 0, 100) / 100  # Convert to 0.0-1.0 scale
+            st.progress(percent if pd.notnull(skor_num) and pd.notnull(target_skor_num) else 0)
+            
             st.write(f"Reward: **Rp {reward if pd.notnull(reward) else 0:,.0f}**".replace(",", "."))
             # Safely format date without assuming datetime object
             tanggal_str = str(row['tanggal']) if pd.notnull(row['tanggal']) else '-'
