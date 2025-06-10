@@ -236,7 +236,7 @@ if page == "Individual Dashboard":
             target_fv = row['target_fv'] if pd.notnull(row['target_fv']) and row['target_fv'] != 0 else 1
             aktual_fv = row['aktual_fv']
             total_outlet = row['total_outlet_bulan'] if pd.notnull(row['total_outlet_bulan']) and row['total_outlet_bulan'] != 0 else 1
-            jumlah_kunjungan = row['jumlah_kunjungan_outlet']
+            jumlah_kunjungan_outlet = row['jumlah_kunjungan_outlet']
             target_outlet_baru = row['Target_outletbaru'] if pd.notnull(row['Target_outletbaru']) and row['Target_outletbaru'] != 0 else 1
             outlet_baru = row['total_outlet_baru']
             skor_total = row['skor_total']
