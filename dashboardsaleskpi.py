@@ -172,8 +172,10 @@ def load_data_from_gsheet():
             'Target_outletbaru', 'total_outlet_baru', '%outletbaru',
             'skor_total', 'target_skor', 'reward'
         ]
-        df = df[required_columns]
-        # Convert numeric columns to appropriate type
+        # Filter columns that exist in the sheet
+        available_columns = [col for col in required_columns if col in df.columns]
+        df = df[available_columns]
+        # Convert numeric columns to appropriate type and handle NaN/inf
         numeric_columns = [
             'absensi', 'target_absen', '%absen', 'target_sa', 'aktual_sa', '%SA',
             'target_fv', 'aktual_fv', '%VF', 'total_outlet_bulan', 'jumlah_kunjungan_outlet',
@@ -181,9 +183,10 @@ def load_data_from_gsheet():
             'skor_total', 'target_skor', 'reward'
         ]
         for col in numeric_columns:
-            df[col] = pd.to_numeric(df[col], errors='coerce')
-        # Replace non-finite values in skor_total with 0
-        df['skor_total'] = df['skor_total'].replace([np.inf, -np.inf], np.nan).fillna(0)
+            if col in df.columns:
+                df[col] = pd.to_numeric(df[col], errors='coerce').fillna(0)
+                # Replace inf with 0
+                df[col] = df[col].replace([np.inf, -np.inf], 0)
         return df
     except Exception as e:
         st.error(f"Error loading data: {e}")
@@ -291,23 +294,25 @@ elif page == "Leaderboard":
         leaderboard_df = df.copy()
     
     if not leaderboard_df.empty:
-        # Add rank based on skor_total, handling non-finite values
+        # Handle ranking with NaN values in skor_total
         leaderboard_df['Rank'] = leaderboard_df['skor_total'].rank(ascending=False, method='min', na_option='bottom').astype(int)
-        leaderboard_df = leaderboard_df.sort_values('skor_total', ascending=False, na_position='last').reset_index(drop=True)
+        leaderboard_df = leaderboard_df.sort_values('skor_total', ascending=False).reset_index(drop=True)
         
         # Select columns for display
         display_columns = ['Rank', 'tanggal', 'Cluster', 'nama_sales', '%absen', '%SA', '%VF', '%kunjungan', '%outletbaru', 'skor_total']
+        # Ensure only available columns are selected
+        display_columns = [col for col in display_columns if col in leaderboard_df.columns]
         leaderboard_df = leaderboard_df[display_columns]
         
         # Format the dataframe for display
         formatted_df = leaderboard_df.copy()
         formatted_df['tanggal'] = formatted_df['tanggal'].apply(lambda x: x.strftime('%Y-%m-%d') if pd.notnull(x) else '-')
-        formatted_df['%absen'] = formatted_df['%absen'].apply(lambda x: f"{x*100:.2f}%" if pd.notnull(x) else '-')
-        formatted_df['%SA'] = formatted_df['%SA'].apply(lambda x: f"{x*100:.2f}%" if pd.notnull(x) else '-')
-        formatted_df['%VF'] = formatted_df['%VF'].apply(lambda x: f"{x*100:.2f}%" if pd.notnull(x) else '-')
-        formatted_df['%kunjungan'] = formatted_df['%kunjungan'].apply(lambda x: f"{x*100:.2f}%" if pd.notnull(x) else '-')
-        formatted_df['%outletbaru'] = formatted_df['%outletbaru'].apply(lambda x: f"{x*100:.2f}%" if pd.notnull(x) else '-')
-        formatted_df['skor_total'] = formatted_df['skor_total'].apply(lambda x: f"{x:.2f}" if pd.notnull(x) else '-')
+        formatted_df['%absen'] = (formatted_df['%absen'] * 100).round(2).apply(lambda x: f"{x:.2f}%")
+        formatted_df['%SA'] = (formatted_df['%SA'] * 100).round(2).apply(lambda x: f"{x:.2f}%")
+        formatted_df['%VF'] = (formatted_df['%VF'] * 100).round(2).apply(lambda x: f"{x:.2f}%")
+        formatted_df['%kunjungan'] = (formatted_df['%kunjungan'] * 100).round(2).apply(lambda x: f"{x:.2f}%")
+        formatted_df['%outletbaru'] = (formatted_df['%outletbaru'] * 100).round(2).apply(lambda x: f"{x:.2f}%")
+        formatted_df['skor_total'] = formatted_df['skor_total'].apply(lambda x: f"{x:.2f}")
         
         # Rename columns for better display
         formatted_df.columns = ['Rank', 'Tanggal', 'Cluster', 'Nama Sales', '% Absen', '% SA', '% VF', '% Kunjungan', '% Outlet Baru', 'Skor Total']
