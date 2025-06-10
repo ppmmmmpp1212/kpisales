@@ -164,10 +164,10 @@ def load_data_from_gsheet():
     url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/gviz/tq?tqx=out:csv&sheet={sheet_name}"
     try:
         df = pd.read_csv(url, parse_dates=["tanggal"])
-        numeric_columns = ['Cluster','absensi', 'target_sa', 'aktual_sa', 'target_fv', 'aktual_fv', 
-                           'total_outlet_bulan', 'jumlah_kunjungan_outlet', 'Target_outletbaru', 
-                           'total_outlet_baru', 'skor_total', 'target_skor', 'reward', 
-                           '%absen', '%SA', '%VF', '%kunjungan', '%outletbaru']
+        numeric_columns = ['Cluster', 'absensi', 'target_sa', 'aktual_sa', 'target_fv', 'aktual_fv', 
+                          'total_outlet_bulan', 'jumlah_kunjungan_outlet', 'Target_outletbaru', 
+                          'total_outlet_baru', 'skor_total', 'target_skor', 'reward', 
+                          '%absen', '%SA', '%VF', '%kunjungan', '%outletbaru']
         for col in numeric_columns:
             df[col] = pd.to_numeric(df[col], errors='coerce')
         return df
@@ -287,8 +287,11 @@ elif page == "Leaderboard":
         leaderboard_df = df.copy()
     
     if not leaderboard_df.empty:
-        # Handle NaN in skor_total before ranking
-        leaderboard_df['skor_total'] = leaderboard_df['skor_total'].fillna(0)
+        # Handle NaN in numeric columns
+        numeric_columns = ['skor_total', '%absen', '%SA', '%VF', '%kunjungan', '%outletbaru']
+        for col in numeric_columns:
+            leaderboard_df[col] = leaderboard_df[col].fillna(0)
+        
         # Add rank based on skor_total
         leaderboard_df['Rank'] = leaderboard_df['skor_total'].rank(ascending=False, method='min').astype(int)
         leaderboard_df = leaderboard_df.sort_values('skor_total', ascending=False).reset_index(drop=True)
@@ -300,12 +303,13 @@ elif page == "Leaderboard":
         # Format the dataframe for display
         formatted_df = leaderboard_df.copy()
         formatted_df['tanggal'] = formatted_df['tanggal'].apply(lambda x: x.strftime('%Y-%m-%d') if pd.notnull(x) else '-')
-        formatted_df['%absen'] = (formatted_df['%absen'].fillna(0) * 100).round(2).apply(lambda x: f"{x:.2f}%")
-        formatted_df['%SA'] = (formatted_df['%SA'].fillna(0) * 100).round(2).apply(lambda x: f"{x:.2f}%")
-        formatted_df['%VF'] = (formatted_df['%VF'].fillna(0) * 100).round(2).apply(lambda x: f"{x:.2f}%")
-        formatted_df['%kunjungan'] = (formatted_df['%kunjungan'].fillna(0) * 100).round(2).apply(lambda x: f"{x:.2f}%")
-        formatted_df['%outletbaru'] = (formatted_df['%outletbaru'].fillna(0) * 100).round(2).apply(lambda x: f"{x:.2f}%")
-        formatted_df['skor_total'] = formatted_df['skor_total'].apply(lambda x: f"{x:.2f}")
+        
+        # Format percentage columns
+        for col in ['%absen', '%SA', '%VF', '%kunjungan', '%outletbaru']:
+            formatted_df[col] = formatted_df[col].apply(lambda x: f"{x * 100:.2f}%" if pd.notnull(x) else "0.00%")
+        
+        # Format skor_total
+        formatted_df['skor_total'] = formatted_df['skor_total'].apply(lambda x: f"{x:.2f}" if pd.notnull(x) else "0.00")
         
         # Rename columns for better display
         formatted_df.columns = ['Rank', 'Tanggal', 'Cluster', 'Nama Sales', '% Absen', '% SA', '% VF', '% Kunjungan', '% Outlet Baru', 'Skor Total']
@@ -315,7 +319,7 @@ elif page == "Leaderboard":
             st.dataframe(
                 formatted_df,
                 use_container_width=True,
-                height=600,  # Adjust height to show more rows without scrolling
+                height=600,
                 column_config={
                     'Rank': st.column_config.NumberColumn(width="small"),
                     'Tanggal': st.column_config.TextColumn(width="medium"),
@@ -329,5 +333,10 @@ elif page == "Leaderboard":
                     'Skor Total': st.column_config.TextColumn(width="small")
                 }
             )
+        
+        # Debugging: Show raw data for inspection
+        with st.expander("Inspect Raw Data"):
+            st.write("Raw Leaderboard Data:")
+            st.dataframe(leaderboard_df)
     else:
         st.warning("No data available for the selected cluster.")
