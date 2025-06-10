@@ -230,7 +230,7 @@ if page == "Individual Dashboard":
             
             # Data Processing (using raw values)
             absensi = row['absensi']
-            absen_target = row['target_absen']
+            target_absen = row['target_absen']
             target_sa = row['target_sa'] if pd.notnull(row['target_sa']) and row['target_sa'] != 0 else 1
             aktual_sa = row['aktual_sa']
             target_fv = row['target_fv'] if pd.notnull(row['target_fv']) and row['target_fv'] != 0 else 1
