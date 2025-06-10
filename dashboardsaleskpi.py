@@ -252,14 +252,19 @@ if page == "Individual Dashboard":
                         
             st.markdown("---")
             st.markdown("<h3 style='text-align: center;'>🎯 Skor Total & Reward</h3>", unsafe_allow_html=True)
-            st.write(f"Skor: **{skor_total if pd.notnull(skor_total) else 0}** dari target **{target_skor if pd.notnull(target_skor) else 0}**")
             
             # Calculate percentage for progress bar
             skor_num = pd.to_numeric(skor_total, errors='coerce')
             target_skor_num = pd.to_numeric(target_skor, errors='coerce')
-            percent = min(skor_num / target_skor_num if target_skor_num and pd.notnull(target_skor_num) and target_skor_num != 0 else 0, 1.0)
-            st.progress(percent)
+            percent = (skor_num / target_skor_num * 100 if target_skor_num and pd.notnull(target_skor_num) and target_skor_num != 0 else 0)
+            percent_display = min(percent, 100)  # For display purposes (in %)
+            percent_progress = min(percent / 100, 1.0)  # For st.progress (0.0 to 1.0)
             
+            # Display styled progress info
+            st.markdown(styled_progress_info("Skor Total", skor_total, target_skor, "poin"), unsafe_allow_html=True)
+            st.progress(percent_progress)
+            
+            # Display reward and date
             st.write(f"Reward: **Rp {reward if pd.notnull(reward) else 0:,.0f}**".replace(",", "."))
             tanggal_str = str(row['tanggal']) if pd.notnull(row['tanggal']) else '-'
             try:
