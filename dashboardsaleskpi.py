@@ -160,7 +160,7 @@ def custom_progress_bar(label, actual, target, emoji="🚶"):
 @st.cache_data
 def load_data_from_gsheet():
     sheet_id = "1f9faUw7p9nhh3flE_EogTLi-64AMvzPMLHKNBcsr19o"
-    sheet_name = "Sheet7"
+    sheet_name = "KPI"
     url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/gviz/tq?tqx=out:csv&sheet={sheet_name}"
     try:
         df = pd.read_csv(url, parse_dates=["tanggal"])
