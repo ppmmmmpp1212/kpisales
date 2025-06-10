@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
 from datetime import datetime
 
 # Page Configuration
@@ -128,13 +127,13 @@ def sales_scorecard(name, cluster):
 
 # Function to create styled progress info
 def styled_progress_info(title, actual, target, unit="hari"):
-    percent = actual / target * 100 if target != 0 else 0
+    percent = (actual / target * 100 if target and pd.notnull(target) and target != 0 else 0)
     color = "#10B981" if percent >= 100 else "#3B82F6"
     return f"""
     <div style='margin-bottom: 0.5em;'>
         <div style='font-size: 1.1em; font-weight: bold; color: #1E3A8A;'>{title}</div>
         <div style='font-size: 0.95em; color: #374151;'>
-            <span style='font-weight: 600; color: {color};'>{actual:.1f}</span> dari <b>{target:.0f}</b> {unit} 
+            <span style='font-weight: 600; color: {color};'>{actual if pd.notnull(actual) else 0}</span> dari <b>{target if pd.notnull(target) else 0}</b> {unit} 
             <span style='float: right; color: {color};'>({percent:.2f}%)</span>
         </div>
     </div>
@@ -142,7 +141,7 @@ def styled_progress_info(title, actual, target, unit="hari"):
 
 # Function to create custom progress bar
 def custom_progress_bar(label, actual, target, emoji="🚶"):
-    percent = min(actual / target * 100 if target != 0 else 0, 100)
+    percent = min(actual / target * 100 if target and pd.notnull(target) and target != 0 else 0, 100)
     color = "#3B82F6"
     return f"""
     <div style="margin-bottom: 1em;">
@@ -164,7 +163,7 @@ def load_data_from_gsheet():
     url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/gviz/tq?tqx=out:csv&sheet={sheet_name}"
     try:
         df = pd.read_csv(url, parse_dates=["tanggal"])
-        # Select only the required columns
+        # Select only the required columns without manipulation
         required_columns = [
             'tanggal', 'Cluster', 'nama_sales', 'absensi', 'target_absen', '%absen',
             'target_sa', 'aktual_sa', '%SA', 'target_fv', 'aktual_fv', '%VF',
@@ -172,22 +171,9 @@ def load_data_from_gsheet():
             'Target_outletbaru', 'total_outlet_baru', '%outletbaru',
             'skor_total', 'target_skor', 'reward'
         ]
-        # Filter columns that exist in the sheet
         available_columns = [col for col in required_columns if col in df.columns]
         df = df[available_columns]
-        # Convert numeric columns to appropriate type and handle NaN/inf
-        numeric_columns = [
-            'absensi', 'target_absen', '%absen', 'target_sa', 'aktual_sa', '%SA',
-            'target_fv', 'aktual_fv', '%VF', 'total_outlet_bulan', 'jumlah_kunjungan_outlet',
-            '%kunjungan', 'Target_outletbaru', 'total_outlet_baru', '%outletbaru',
-            'skor_total', 'target_skor', 'reward'
-        ]
-        for col in numeric_columns:
-            if col in df.columns:
-                df[col] = pd.to_numeric(df[col], errors='coerce')
-                # Replace NaN with 0 and inf with 0
-                df[col] = df[col].fillna(0).replace([np.inf, -np.inf], 0)
-        # Debug: Display first few rows to verify data
+        # Display raw data for verification
         st.write("Raw Data Sample:", df.head())
         return df
     except Exception as e:
@@ -241,20 +227,20 @@ if page == "Individual Dashboard":
         with st.container():
             st.markdown(sales_scorecard(row['nama_sales'], row['Cluster']), unsafe_allow_html=True)
             
-            # Data Processing
-            absensi = float(row['absensi']) if pd.notnull(row['absensi']) else 0
-            absen_target = float(row['target_absen']) if pd.notnull(row['target_absen']) else 1
-            target_sa = float(row['target_sa']) if pd.notnull(row['target_sa']) and float(row['target_sa']) != 0 else 1
-            aktual_sa = float(row['aktual_sa']) if pd.notnull(row['aktual_sa']) else 0
-            target_fv = float(row['target_fv']) if pd.notnull(row['target_fv']) and float(row['target_fv']) != 0 else 1
-            aktual_fv = float(row['aktual_fv']) if pd.notnull(row['aktual_fv']) else 0
-            total_outlet = float(row['total_outlet_bulan']) if pd.notnull(row['total_outlet_bulan']) and float(row['total_outlet_bulan']) != 0 else 1
-            jumlah_kunjungan = float(row['jumlah_kunjungan_outlet']) if pd.notnull(row['jumlah_kunjungan_outlet']) else 0
-            target_outlet_baru = float(row['Target_outletbaru']) if pd.notnull(row['Target_outletbaru']) and float(row['Target_outletbaru']) != 0 else 1
-            outlet_baru = float(row['total_outlet_baru']) if pd.notnull(row['total_outlet_baru']) else 0
-            skor_total = float(row['skor_total']) if pd.notnull(row['skor_total']) else 0
-            target_skor = float(row['target_skor']) if pd.notnull(row['target_skor']) and float(row['target_skor']) != 0 else 1
-            reward = float(row['reward']) if pd.notnull(row['reward']) else 0
+            # Data Processing (using raw values)
+            absensi = row['absensi']
+            absen_target = row['target_absen']
+            target_sa = row['target_sa'] if pd.notnull(row['target_sa']) and row['target_sa'] != 0 else 1
+            aktual_sa = row['aktual_sa']
+            target_fv = row['target_fv'] if pd.notnull(row['target_fv']) and row['target_fv'] != 0 else 1
+            aktual_fv = row['aktual_fv']
+            total_outlet = row['total_outlet_bulan'] if pd.notnull(row['total_outlet_bulan']) and row['total_outlet_bulan'] != 0 else 1
+            jumlah_kunjungan = row['jumlah_kunjungan_outlet']
+            target_outlet_baru = row['Target_outletbaru'] if pd.notnull(row['Target_outletbaru']) and row['Target_outletbaru'] != 0 else 1
+            outlet_baru = row['total_outlet_baru']
+            skor_total = row['skor_total']
+            target_skor = row['target_skor'] if pd.notnull(row['target_skor']) and row['target_skor'] != 0 else 1
+            reward = row['reward']
             
             st.markdown("---")
             st.markdown("<h3 style='text-align: center;'>🎯 Pencapaian Parameter</h3>", unsafe_allow_html=True)
@@ -265,24 +251,24 @@ if page == "Individual Dashboard":
             
             with col1:
                 st.markdown(styled_progress_info("Absensi", absensi, absen_target, "hari"), unsafe_allow_html=True)
-                st.progress(min(absensi / absen_target, 1.0))
+                st.progress(min(absensi / absen_target if absen_target and pd.notnull(absen_target) and absen_target != 0 else 0, 1.0) if pd.notnull(absensi) and pd.notnull(absen_target) else 0)
                 st.markdown(styled_progress_info("SA Achievement", aktual_sa, target_sa, "unit"), unsafe_allow_html=True)
-                st.progress(min(aktual_sa / target_sa, 1.0))
+                st.progress(min(aktual_sa / target_sa if target_sa and pd.notnull(target_sa) and target_sa != 0 else 0, 1.0) if pd.notnull(aktual_sa) and pd.notnull(target_sa) else 0)
                 st.markdown(styled_progress_info("FV Achievement", aktual_fv, target_fv, "unit"), unsafe_allow_html=True)
-                st.progress(min(aktual_fv / target_fv, 1.0))
+                st.progress(min(aktual_fv / target_fv if target_fv and pd.notnull(target_fv) and target_fv != 0 else 0, 1.0) if pd.notnull(aktual_fv) and pd.notnull(target_fv) else 0)
             
             with col2:
                 st.markdown(styled_progress_info("Kunjungan Outlet", jumlah_kunjungan, total_outlet, "outlet"), unsafe_allow_html=True)
-                st.progress(min(jumlah_kunjungan / total_outlet, 1.0))
+                st.progress(min(jumlah_kunjungan / total_outlet if total_outlet and pd.notnull(total_outlet) and total_outlet != 0 else 0, 1.0) if pd.notnull(jumlah_kunjungan) and pd.notnull(total_outlet) else 0)
                 st.markdown(styled_progress_info("Outlet Baru", outlet_baru, target_outlet_baru, "outlet"), unsafe_allow_html=True)
-                st.progress(min(outlet_baru / target_outlet_baru, 1.0))
+                st.progress(min(outlet_baru / target_outlet_baru if target_outlet_baru and pd.notnull(target_outlet_baru) and target_outlet_baru != 0 else 0, 1.0) if pd.notnull(outlet_baru) and pd.notnull(target_outlet_baru) else 0)
             
             st.markdown("---")
             st.markdown("<h3 style='text-align: center;'>🎯 Skor Total & Reward</h3>", unsafe_allow_html=True)
-            st.write(f"Skor: **{skor_total:.2f}** dari target **{target_skor:.0f}**")
+            st.write(f"Skor: **{skor_total if pd.notnull(skor_total) else 0}** dari target **{target_skor if pd.notnull(target_skor) else 0}**")
             st.markdown(custom_progress_bar("Total Skor", skor_total, target_skor, emoji="🚶"), unsafe_allow_html=True)
-            st.write(f"Reward: **Rp {reward:,.0f}**".replace(",", "."))
-            st.markdown(f"📅 Data Tanggal: **{row['tanggal']:%Y-%m-%d}**")
+            st.write(f"Reward: **Rp {reward if pd.notnull(reward) else 0:,.0f}**".replace(",", "."))
+            st.markdown(f"📅 Data Tanggal: **{row['tanggal']:%Y-%m-%d if pd.notnull(row['tanggal']) else '-'}**")
     else:
         st.warning("No data available for the selected filters.")
 
@@ -296,26 +282,26 @@ elif page == "Leaderboard":
         leaderboard_df = df.copy()
     
     if not leaderboard_df.empty:
-        # Handle ranking with NaN values in skor_total
-        leaderboard_df['Rank'] = leaderboard_df['skor_total'].rank(ascending=False, method='min', na_option='bottom').astype(int)
+        # Handle ranking with raw values
+        leaderboard_df['Rank'] = leaderboard_df['skor_total'].rank(ascending=False, method='min', na_option='bottom')
         leaderboard_df = leaderboard_df.sort_values('skor_total', ascending=False).reset_index(drop=True)
         
         # Select columns for display
         display_columns = ['Rank', 'tanggal', 'Cluster', 'nama_sales', '%absen', '%SA', '%VF', '%kunjungan', '%outletbaru', 'skor_total']
-        # Ensure only available columns are selected
         display_columns = [col for col in display_columns if col in leaderboard_df.columns]
         leaderboard_df = leaderboard_df[display_columns]
         
-        # Format the dataframe for display
+        # Format the dataframe for display using raw values
         formatted_df = leaderboard_df.copy()
         formatted_df['tanggal'] = formatted_df['tanggal'].apply(lambda x: x.strftime('%Y-%m-%d') if pd.notnull(x) else '-')
-        # Adjust percentage columns to handle fractions (0.0-1.0) and convert to percentage (0-100)
-        formatted_df['%absen'] = (formatted_df['%absen'] * 100).round(2).apply(lambda x: f"{x:.2f}%")
-        formatted_df['%SA'] = (formatted_df['%SA'] * 100).round(2).apply(lambda x: f"{x:.2f}%")
-        formatted_df['%VF'] = (formatted_df['%VF'] * 100).round(2).apply(lambda x: f"{x:.2f}%")
-        formatted_df['%kunjungan'] = (formatted_df['%kunjungan'] * 100).round(2).apply(lambda x: f"{x:.2f}%")
-        formatted_df['%outletbaru'] = (formatted_df['%outletbaru'] * 100).round(2).apply(lambda x: f"{x:.2f}%")
-        formatted_df['skor_total'] = formatted_df['skor_total'].apply(lambda x: f"{x:.2f}")
+        # Display percentages as-is, assuming they might be fractions or percentages
+        formatted_df['%absen'] = formatted_df['%absen'].apply(lambda x: f"{x:.2f}%" if pd.notnull(x) else "0.00%")
+        formatted_df['%SA'] = formatted_df['%SA'].apply(lambda x: f"{x:.2f}%" if pd.notnull(x) else "0.00%")
+        formatted_df['%VF'] = formatted_df['%VF'].apply(lambda x: f"{x:.2f}%" if pd.notnull(x) else "0.00%")
+        formatted_df['%kunjungan'] = formatted_df['%kunjungan'].apply(lambda x: f"{x:.2f}%" if pd.notnull(x) else "0.00%")
+        formatted_df['%outletbaru'] = formatted_df['%outletbaru'].apply(lambda x: f"{x:.2f}%" if pd.notnull(x) else "0.00%")
+        formatted_df['skor_total'] = formatted_df['skor_total'].apply(lambda x: f"{x:.2f}" if pd.notnull(x) else "0.00")
+        formatted_df['Rank'] = formatted_df['Rank'].apply(lambda x: int(x) if pd.notnull(x) else 0)
         
         # Rename columns for better display
         formatted_df.columns = ['Rank', 'Tanggal', 'Cluster', 'Nama Sales', '% Absen', '% SA', '% VF', '% Kunjungan', '% Outlet Baru', 'Skor Total']
