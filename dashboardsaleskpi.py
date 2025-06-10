@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-import plotly.express as px
+import numpy as np
 from datetime import datetime
 
 # Page Configuration
@@ -182,6 +182,8 @@ def load_data_from_gsheet():
         ]
         for col in numeric_columns:
             df[col] = pd.to_numeric(df[col], errors='coerce')
+        # Replace non-finite values in skor_total with 0
+        df['skor_total'] = df['skor_total'].replace([np.inf, -np.inf], np.nan).fillna(0)
         return df
     except Exception as e:
         st.error(f"Error loading data: {e}")
@@ -289,9 +291,9 @@ elif page == "Leaderboard":
         leaderboard_df = df.copy()
     
     if not leaderboard_df.empty:
-        # Add rank based on skor_total
-        leaderboard_df['Rank'] = leaderboard_df['skor_total'].rank(ascending=False, method='min').astype(int)
-        leaderboard_df = leaderboard_df.sort_values('skor_total', ascending=False).reset_index(drop=True)
+        # Add rank based on skor_total, handling non-finite values
+        leaderboard_df['Rank'] = leaderboard_df['skor_total'].rank(ascending=False, method='min', na_option='bottom').astype(int)
+        leaderboard_df = leaderboard_df.sort_values('skor_total', ascending=False, na_position='last').reset_index(drop=True)
         
         # Select columns for display
         display_columns = ['Rank', 'tanggal', 'Cluster', 'nama_sales', '%absen', '%SA', '%VF', '%kunjungan', '%outletbaru', 'skor_total']
@@ -300,12 +302,12 @@ elif page == "Leaderboard":
         # Format the dataframe for display
         formatted_df = leaderboard_df.copy()
         formatted_df['tanggal'] = formatted_df['tanggal'].apply(lambda x: x.strftime('%Y-%m-%d') if pd.notnull(x) else '-')
-        formatted_df['%absen'] = (formatted_df['%absen'] * 100).round(2).apply(lambda x: f"{x:.2f}%")
-        formatted_df['%SA'] = (formatted_df['%SA'] * 100).round(2).apply(lambda x: f"{x:.2f}%")
-        formatted_df['%VF'] = (formatted_df['%VF'] * 100).round(2).apply(lambda x: f"{x:.2f}%")
-        formatted_df['%kunjungan'] = (formatted_df['%kunjungan'] * 100).round(2).apply(lambda x: f"{x:.2f}%")
-        formatted_df['%outletbaru'] = (formatted_df['%outletbaru'] * 100).round(2).apply(lambda x: f"{x:.2f}%")
-        formatted_df['skor_total'] = formatted_df['skor_total'].apply(lambda x: f"{x:.2f}")
+        formatted_df['%absen'] = formatted_df['%absen'].apply(lambda x: f"{x*100:.2f}%" if pd.notnull(x) else '-')
+        formatted_df['%SA'] = formatted_df['%SA'].apply(lambda x: f"{x*100:.2f}%" if pd.notnull(x) else '-')
+        formatted_df['%VF'] = formatted_df['%VF'].apply(lambda x: f"{x*100:.2f}%" if pd.notnull(x) else '-')
+        formatted_df['%kunjungan'] = formatted_df['%kunjungan'].apply(lambda x: f"{x*100:.2f}%" if pd.notnull(x) else '-')
+        formatted_df['%outletbaru'] = formatted_df['%outletbaru'].apply(lambda x: f"{x*100:.2f}%" if pd.notnull(x) else '-')
+        formatted_df['skor_total'] = formatted_df['skor_total'].apply(lambda x: f"{x:.2f}" if pd.notnull(x) else '-')
         
         # Rename columns for better display
         formatted_df.columns = ['Rank', 'Tanggal', 'Cluster', 'Nama Sales', '% Absen', '% SA', '% VF', '% Kunjungan', '% Outlet Baru', 'Skor Total']
