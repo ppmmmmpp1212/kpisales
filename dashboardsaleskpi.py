@@ -10,7 +10,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS for card styling and table
+# Custom CSS (unchanged)
 st.markdown("""
     <style>
     .card-container {
@@ -96,7 +96,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Function to create a metric card
+# Function to create a metric card (unchanged)
 def metric_card(label, value, trend):
     return f"""
     <div class="metric-card">
@@ -106,6 +106,7 @@ def metric_card(label, value, trend):
     </div>
     """
 
+# Function to create sales scorecard (unchanged)
 def sales_scorecard(name, cluster):
     return f"""
     <div style='
@@ -125,9 +126,8 @@ def sales_scorecard(name, cluster):
     </div>
     """
 
-# Function to create styled progress info
+# Function to create styled progress info (unchanged)
 def styled_progress_info(title, actual, target, unit="hari"):
-    # Safely convert to numeric for calculation, keeping original data intact
     actual_num = pd.to_numeric(actual, errors='coerce')
     target_num = pd.to_numeric(target, errors='coerce')
     percent = (actual_num / target_num * 100 if target_num and pd.notnull(target_num) and target_num != 0 else 0)
@@ -144,22 +144,10 @@ def styled_progress_info(title, actual, target, unit="hari"):
 
 # Function to create custom progress bar
 def custom_progress_bar(label, actual, target, emoji="🚶"):
-    # Safely convert to numeric for calculation
     actual_num = pd.to_numeric(actual, errors='coerce')
     target_num = pd.to_numeric(target, errors='coerce')
-    percent = min(actual_num / target_num * 100 if target_num and pd.notnull(target_num) and target_num != 0 else 0, 100)
-    color = "#3B82F6"
-    return f"""
-    <div style="margin-bottom: 1em;">
-        <div style="display: flex; align-items: center; margin-bottom: 0.3em;">
-            <span style="font-size: 1.1em; margin-right: 0.4em;">{emoji}</span>
-            <span style="font-size: 1em; font-weight: 600; color: #1E3A8A;">{label} ({percent:.2f}%)</span>
-        </div>
-        <div style="background-color: #E5E7EB; border-radius: 10px; height: 18px; width: 100%;">
-            <div style="height: 100%; width: {percent}%; background-color: {color}; border-radius: 10px;"></div>
-        </div>
-    </div>
-    """
+    percent = min(actual_num / target_num if target_num and pd.notnull(target_num) and target_num != 0 else 0, 1.0)
+    return st.progress(percent)
 
 # Load Data from Google Sheets
 @st.cache_data
@@ -169,7 +157,6 @@ def load_data_from_gsheet():
     url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/gviz/tq?tqx=out:csv&sheet={sheet_name}"
     try:
         df = pd.read_csv(url, parse_dates=["tanggal"])
-        # Select only the required columns without manipulation
         required_columns = [
             'tanggal', 'Cluster', 'nama_sales', 'absensi', 'target_absen', '%absen',
             'target_sa', 'aktual_sa', '%SA', 'target_fv', 'aktual_fv', '%VF',
@@ -178,6 +165,9 @@ def load_data_from_gsheet():
             'skor_total', 'target_skor', 'reward'
         ]
         available_columns = [col for col in required_columns if col in df.columns]
+        if len(available_columns) < len(required_columns):
+            missing = [col for col in required_columns if col not in df.columns]
+            st.warning(f"Missing columns in data: {missing}")
         df = df[available_columns]
         return df
     except Exception as e:
@@ -186,19 +176,17 @@ def load_data_from_gsheet():
 
 df = load_data_from_gsheet()
 
-# Sidebar
+# Sidebar (unchanged)
 with st.sidebar:
     st.image("https://via.placeholder.com/150", caption="Sales Dashboard Logo")
     st.title("📈 Sales Performance")
     st.markdown("---")
     
-    # Page selection with only Individual Dashboard
     page = "Individual Dashboard"
     
     cluster_options = ['All Clusters'] + sorted(df['Cluster'].unique().tolist() if not df.empty else [])
     selected_cluster = st.selectbox("Filter by Cluster", cluster_options)
     
-    # Filter sales names based on selected cluster
     if selected_cluster != 'All Clusters':
         filtered_df = df[df['Cluster'] == selected_cluster]
     else:
@@ -226,19 +214,20 @@ if page == "Individual Dashboard":
         with st.container():
             st.markdown(sales_scorecard(row['nama_sales'], row['Cluster']), unsafe_allow_html=True)
             
-            absensi = row['absensi']
-            absen_target = row['target_absen']
-            target_sa = row['target_sa'] if pd.notnull(row['target_sa']) and row['target_sa'] != 0 else 1
-            aktual_sa = row['aktual_sa']
-            target_fv = row['target_fv'] if pd.notnull(row['target_fv']) and row['target_fv'] != 0 else 1
-            aktual_fv = row['aktual_fv']
-            total_outlet_bulan = row['total_outlet'] if pd.notnull(row['total_outlet_bulan']) and row['total_outlet'] != 0 else 1
-            jumlah_kunjungan_outlet = row['jumlah_kunjungan_outlet']
-            Target_outletbaru = row['Target_outletbaru'] if pd.notnull(row['Target_outletbaru']) and row['Target_outletbaru'] != 0 else 1
-            total_outlet_baru = row['total_outlet_baru']
-            skor_total = row['skor_total']
-            target_skor = row['target_skor'] if pd.notnull(row['target_skor']) and row['target_skor'] != 0 else 1
-            reward = row['reward']
+            # Assign variables with proper column checks
+            absensi = row['absensi'] if 'absensi' in row else 0
+            absen_target = row['target_absen'] if 'target_absen' in row else 1
+            target_sa = row['target_sa'] if 'target_sa' in row and pd.notnull(row['target_sa']) and row['target_sa'] != 0 else 1
+            aktual_sa = row['aktual_sa'] if 'aktual_sa' in row else 0
+            target_fv = row['target_fv'] if 'target_fv' in row and pd.notnull(row['target_fv']) and row['target_fv'] != 0 else 1
+            aktual_fv = row['aktual_fv'] if 'aktual_fv' in row else 0
+            total_outlet_bulan = row['total_outlet_bulan'] if 'total_outlet_bulan' in row and pd.notnull(row['total_outlet_bulan']) and row['total_outlet_bulan'] != 0 else 1
+            jumlah_kunjungan_outlet = row['jumlah_kunjungan_outlet'] if 'jumlah_kunjungan_outlet' in row else 0
+            Target_outletbaru = row['Target_outletbaru'] if 'Target_outletbaru' in row and pd.notnull(row['Target_outletbaru']) and row['Target_outletbaru'] != 0 else 1
+            total_outlet_baru = row['total_outlet_baru'] if 'total_outlet_baru' in row else 0
+            skor_total = row['skor_total'] if 'skor_total' in row else 0
+            target_skor = row['target_skor'] if 'target_skor' in row and pd.notnull(row['target_skor']) and row['target_skor'] != 0 else 1
+            reward = row['reward'] if 'reward' in row else 0
             
             st.markdown("---")
             st.markdown("<h3 style='text-align: center;'>🎯 Pencapaian Parameter</h3>", unsafe_allow_html=True)
@@ -249,17 +238,17 @@ if page == "Individual Dashboard":
 
             with col1:
                 st.markdown(styled_progress_info("Absensi", absensi, absen_target, "hari"), unsafe_allow_html=True)
-                st.progress(min(pd.to_numeric(absensi, errors='coerce') / pd.to_numeric(absen_target, errors='coerce') if pd.to_numeric(absen_target, errors='coerce') and pd.notnull(pd.to_numeric(absen_target, errors='coerce')) and pd.to_numeric(absen_target, errors='coerce') != 0 else 0, 1.0) if pd.notnull(pd.to_numeric(absensi, errors='coerce')) and pd.notnull(pd.to_numeric(absen_target, errors='coerce')) else 0)
+                custom_progress_bar("Absensi", absensi, absen_target)
                 st.markdown(styled_progress_info("SA Achievement", aktual_sa, target_sa, "unit"), unsafe_allow_html=True)
-                st.progress(min(pd.to_numeric(aktual_sa, errors='coerce') / pd.to_numeric(target_sa, errors='coerce') if pd.to_numeric(target_sa, errors='coerce') and pd.notnull(pd.to_numeric(target_sa, errors='coerce')) and pd.to_numeric(target_sa, errors='coerce') != 0 else 0, 1.0) if pd.notnull(pd.to_numeric(aktual_sa, errors='coerce')) and pd.notnull(pd.to_numeric(target_sa, errors='coerce')) else 0)
+                custom_progress_bar("SA Achievement", aktual_sa, target_sa)
                 st.markdown(styled_progress_info("FV Achievement", aktual_fv, target_fv, "unit"), unsafe_allow_html=True)
-                st.progress(min(pd.to_numeric(aktual_fv, errors='coerce') / pd.to_numeric(target_fv, errors='coerce') if pd.to_numeric(target_fv, errors='coerce') and pd.notnull(pd.to_numeric(target_fv, errors='coerce')) and pd.to_numeric(target_fv, errors='coerce') != 0 else 0, 1.0) if pd.notnull(pd.to_numeric(aktual_fv, errors='coerce')) and pd.notnull(pd.to_numeric(target_fv, errors='coerce')) else 0)
+                custom_progress_bar("FV Achievement", aktual_fv, target_fv)
             
             with col2:
                 st.markdown(styled_progress_info("Kunjungan Outlet", jumlah_kunjungan_outlet, total_outlet_bulan, "outlet"), unsafe_allow_html=True)
-                st.progress(min(pd.to_numeric(jumlah_kunjungan_outlet, errors='coerce') / pd.to_numeric(total_outlet_bulan, errors='coerce') if pd.to_numeric(total_outlet_bulan, errors='coerce') and pd.notnull(pd.to_numeric(total_outlet_bulan, errors='coerce')) and pd.to_numeric(total_outlet_bulan, errors='coerce') != 0 else 0, 1.0) if pd.notnull(pd.to_numeric(jumlah_kunjungan_outlet, errors='coerce')) and pd.notnull(pd.to_numeric(total_outlet_bulan, errors='coerce')) else 0)
+                custom_progress_bar("Kunjungan Outlet", jumlah_kunjungan_outlet, total_outlet_bulan)
                 st.markdown(styled_progress_info("Outlet Baru", total_outlet_baru, Target_outletbaru, "outlet"), unsafe_allow_html=True)
-                st.progress(min(pd.to_numeric(total_outlet_baru, errors='coerce') / pd.to_numeric(Target_outletbaru, errors='coerce') if pd.to_numeric(Target_outletbaru, errors='coerce') and pd.notnull(pd.to_numeric(Target_outletbaru, errors='coerce')) and pd.to_numeric(Target_outletbaru, errors='coerce') != 0 else 0, 1.0) if pd.notnull(pd.to_numeric(total_outlet_baru, errors='coerce')) and pd.notnull(pd.to_numeric(Target_outletbaru, errors='coerce')) else 0)
+                custom_progress_bar("Outlet Baru", total_outlet_baru, Target_outletbaru)
                         
             st.markdown("---")
             st.markdown("<h3 style='text-align: center;'>🎯 Skor Total & Reward</h3>", unsafe_allow_html=True)
@@ -268,11 +257,10 @@ if page == "Individual Dashboard":
             # Calculate percentage for progress bar
             skor_num = pd.to_numeric(skor_total, errors='coerce')
             target_skor_num = pd.to_numeric(target_skor, errors='coerce')
-            percent = min(skor_num / target_skor_num * 100 if target_skor_num and pd.notnull(target_skor_num) and target_skor_num != 0 else 0, 100) / 100  # Convert to 0.0-1.0 scale
-            st.progress(percent if pd.notnull(skor_num) and pd.notnull(target_skor_num) else 0)
+            percent = min(skor_num / target_skor_num if target_skor_num and pd.notnull(target_skor_num) and target_skor_num != 0 else 0, 1.0)
+            st.progress(percent)
             
             st.write(f"Reward: **Rp {reward if pd.notnull(reward) else 0:,.0f}**".replace(",", "."))
-            # Safely format date without assuming datetime object
             tanggal_str = str(row['tanggal']) if pd.notnull(row['tanggal']) else '-'
             try:
                 tanggal_dt = pd.to_datetime(tanggal_str)
