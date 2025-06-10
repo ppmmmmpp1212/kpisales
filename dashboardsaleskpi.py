@@ -263,18 +263,18 @@ if page == "Individual Dashboard":
                 st.markdown(styled_progress_info("Outlet Baru", total_outlet_baru, Target_outletbaru, "outlet"), unsafe_allow_html=True)
                 st.progress(min(pd.to_numeric(total_outlet_baru, errors='coerce') / pd.to_numeric(Target_outletbaru, errors='coerce') if pd.to_numeric(Target_outletbaru, errors='coerce') and pd.notnull(pd.to_numeric(Target_outletbaru, errors='coerce')) and pd.to_numeric(Target_outletbaru, errors='coerce') != 0 else 0, 1.0) if pd.notnull(pd.to_numeric(total_outlet_baru, errors='coerce')) and pd.notnull(pd.to_numeric(Target_outletbaru, errors='coerce')) else 0)
                         
-                        st.markdown("---")
-                        st.markdown("<h3 style='text-align: center;'>🎯 Skor Total & Reward</h3>", unsafe_allow_html=True)
-                        st.write(f"Skor: **{skor_total if pd.notnull(skor_total) else 0}** dari target **{target_skor if pd.notnull(target_skor) else 0}**")
-                        st.markdown(custom_progress_bar("Total Skor", skor_total, target_skor, emoji="🚶"), unsafe_allow_html=True)
-                        st.write(f"Reward: **Rp {reward if pd.notnull(reward) else 0:,.0f}**".replace(",", "."))
-                        # Safely format date without assuming datetime object
-                        tanggal_str = str(row['tanggal']) if pd.notnull(row['tanggal']) else '-'
-                        try:
-                            tanggal_dt = pd.to_datetime(tanggal_str)
-                            tanggal_formatted = tanggal_dt.strftime('%Y-%m-%d')
-                        except (ValueError, TypeError):
-                            tanggal_formatted = tanggal_str
-                        st.markdown(f"📅 Data Tanggal: **{tanggal_formatted}**")
-                else:
-                    st.warning("No data available for the selected filters.")
+            st.markdown("---")
+            st.markdown("<h3 style='text-align: center;'>🎯 Skor Total & Reward</h3>", unsafe_allow_html=True)
+            st.write(f"Skor: **{skor_total if pd.notnull(skor_total) else 0}** dari target **{target_skor if pd.notnull(target_skor) else 0}**")
+            st.markdown(custom_progress_bar("Total Skor", skor_total, target_skor, emoji="🚶"), unsafe_allow_html=True)
+            st.write(f"Reward: **Rp {reward if pd.notnull(reward) else 0:,.0f}**".replace(",", "."))
+            # Safely format date without assuming datetime object
+            tanggal_str = str(row['tanggal']) if pd.notnull(row['tanggal']) else '-'
+            try:
+                tanggal_dt = pd.to_datetime(tanggal_str)
+                tanggal_formatted = tanggal_dt.strftime('%Y-%m-%d')
+            except (ValueError, TypeError):
+                tanggal_formatted = tanggal_str
+            st.markdown(f"📅 Data Tanggal: **{tanggal_formatted}**")
+    else:
+        st.warning("No data available for the selected filters.")
