@@ -228,17 +228,16 @@ if page == "Individual Dashboard":
         with st.container():
             st.markdown(sales_scorecard(row['nama_sales'], row['Cluster']), unsafe_allow_html=True)
             
-            # Data Processing (using raw values)
             absensi = row['absensi']
-            target_absen = row['target_absen']
+            absen_target = row['target_absen']
             target_sa = row['target_sa'] if pd.notnull(row['target_sa']) and row['target_sa'] != 0 else 1
             aktual_sa = row['aktual_sa']
             target_fv = row['target_fv'] if pd.notnull(row['target_fv']) and row['target_fv'] != 0 else 1
             aktual_fv = row['aktual_fv']
-            total_outlet = row['total_outlet'] if pd.notnull(row['total_outlet']) and row['total_outlet'] != 0 else 1
+            total_outlet_bulan = row['total_outlet'] if pd.notnull(row['total_outlet_bulan']) and row['total_outlet'] != 0 else 1
             jumlah_kunjungan_outlet = row['jumlah_kunjungan_outlet']
-            target_outlet_baru = row['Target_outletbaru'] if pd.notnull(row['Target_outletbaru']) and row['Target_outletbaru'] != 0 else 1
-            outlet_baru = row['total_outlet_baru']
+            Target_outletbaru = row['Target_outletbaru'] if pd.notnull(row['Target_outletbaru']) and row['Target_outletbaru'] != 0 else 1
+            total_outlet_baru = row['total_outlet_baru']
             skor_total = row['skor_total']
             target_skor = row['target_skor'] if pd.notnull(row['target_skor']) and row['target_skor'] != 0 else 1
             reward = row['reward']
@@ -251,31 +250,31 @@ if page == "Individual Dashboard":
             col1, col2 = st.columns(2)
 
             with col1:
-                st.markdown(styled_progress_info("Absensi", absensi, target_absen, "hari"), unsafe_allow_html=True)
-                st.progress(min(pd.to_numeric(absensi, errors='coerce') / pd.to_numeric(target_absen, errors='coerce') if pd.to_numeric(target_absen, errors='coerce') and pd.notnull(pd.to_numeric(target_absen, errors='coerce')) and pd.to_numeric(target_absen, errors='coerce') != 0 else 0, 1.0) if pd.notnull(pd.to_numeric(absensi, errors='coerce')) and pd.notnull(pd.to_numeric(target_absen, errors='coerce')) else 0)
+                st.markdown(styled_progress_info("Absensi", absensi, absen_target, "hari"), unsafe_allow_html=True)
+                st.progress(min(pd.to_numeric(absensi, errors='coerce') / pd.to_numeric(absen_target, errors='coerce') if pd.to_numeric(absen_target, errors='coerce') and pd.notnull(pd.to_numeric(absen_target, errors='coerce')) and pd.to_numeric(absen_target, errors='coerce') != 0 else 0, 1.0) if pd.notnull(pd.to_numeric(absensi, errors='coerce')) and pd.notnull(pd.to_numeric(absen_target, errors='coerce')) else 0)
                 st.markdown(styled_progress_info("SA Achievement", aktual_sa, target_sa, "unit"), unsafe_allow_html=True)
                 st.progress(min(pd.to_numeric(aktual_sa, errors='coerce') / pd.to_numeric(target_sa, errors='coerce') if pd.to_numeric(target_sa, errors='coerce') and pd.notnull(pd.to_numeric(target_sa, errors='coerce')) and pd.to_numeric(target_sa, errors='coerce') != 0 else 0, 1.0) if pd.notnull(pd.to_numeric(aktual_sa, errors='coerce')) and pd.notnull(pd.to_numeric(target_sa, errors='coerce')) else 0)
                 st.markdown(styled_progress_info("FV Achievement", aktual_fv, target_fv, "unit"), unsafe_allow_html=True)
                 st.progress(min(pd.to_numeric(aktual_fv, errors='coerce') / pd.to_numeric(target_fv, errors='coerce') if pd.to_numeric(target_fv, errors='coerce') and pd.notnull(pd.to_numeric(target_fv, errors='coerce')) and pd.to_numeric(target_fv, errors='coerce') != 0 else 0, 1.0) if pd.notnull(pd.to_numeric(aktual_fv, errors='coerce')) and pd.notnull(pd.to_numeric(target_fv, errors='coerce')) else 0)
             
             with col2:
-                st.markdown(styled_progress_info("Kunjungan Outlet", jumlah_kunjungan_outlet, total_outlet, "outlet"), unsafe_allow_html=True)
-                st.progress(min(pd.to_numeric(jumlah_kunjungan_outlet, errors='coerce') / pd.to_numeric(total_outlet, errors='coerce') if pd.to_numeric(total_outlet, errors='coerce') and pd.notnull(pd.to_numeric(total_outlet, errors='coerce')) and pd.to_numeric(total_outlet, errors='coerce') != 0 else 0, 1.0) if pd.notnull(pd.to_numeric(jumlah_kunjungan_outlet, errors='coerce')) and pd.notnull(pd.to_numeric(total_outlet, errors='coerce')) else 0)
+                st.markdown(styled_progress_info("Kunjungan Outlet", jumlah_kunjungan_outlet, total_outlet_bulan, "outlet"), unsafe_allow_html=True)
+                st.progress(min(pd.to_numeric(jumlah_kunjungan_outlet, errors='coerce') / pd.to_numeric(total_outlet_bulan, errors='coerce') if pd.to_numeric(total_outlet_bulan, errors='coerce') and pd.notnull(pd.to_numeric(total_outlet_bulan, errors='coerce')) and pd.to_numeric(total_outlet_bulan, errors='coerce') != 0 else 0, 1.0) if pd.notnull(pd.to_numeric(jumlah_kunjungan_outlet, errors='coerce')) and pd.notnull(pd.to_numeric(total_outlet_bulan, errors='coerce')) else 0)
                 st.markdown(styled_progress_info("Outlet Baru", total_outlet_baru, Target_outletbaru, "outlet"), unsafe_allow_html=True)
                 st.progress(min(pd.to_numeric(total_outlet_baru, errors='coerce') / pd.to_numeric(Target_outletbaru, errors='coerce') if pd.to_numeric(Target_outletbaru, errors='coerce') and pd.notnull(pd.to_numeric(Target_outletbaru, errors='coerce')) and pd.to_numeric(Target_outletbaru, errors='coerce') != 0 else 0, 1.0) if pd.notnull(pd.to_numeric(total_outlet_baru, errors='coerce')) and pd.notnull(pd.to_numeric(Target_outletbaru, errors='coerce')) else 0)
-            
-            st.markdown("---")
-            st.markdown("<h3 style='text-align: center;'>🎯 Skor Total & Reward</h3>", unsafe_allow_html=True)
-            st.write(f"Skor: **{skor_total if pd.notnull(skor_total) else 0}** dari target **{target_skor if pd.notnull(target_skor) else 0}**")
-            st.markdown(custom_progress_bar("Total Skor", skor_total, target_skor, emoji="🚶"), unsafe_allow_html=True)
-            st.write(f"Reward: **Rp {reward if pd.notnull(reward) else 0:,.0f}**".replace(",", "."))
-            # Safely format date without assuming datetime object
-            tanggal_str = str(row['tanggal']) if pd.notnull(row['tanggal']) else '-'
-            try:
-                tanggal_dt = pd.to_datetime(tanggal_str)
-                tanggal_formatted = tanggal_dt.strftime('%Y-%m-%d')
-            except (ValueError, TypeError):
-                tanggal_formatted = tanggal_str
-            st.markdown(f"📅 Data Tanggal: **{tanggal_formatted}**")
-    else:
-        st.warning("No data available for the selected filters.")
+                        
+                        st.markdown("---")
+                        st.markdown("<h3 style='text-align: center;'>🎯 Skor Total & Reward</h3>", unsafe_allow_html=True)
+                        st.write(f"Skor: **{skor_total if pd.notnull(skor_total) else 0}** dari target **{target_skor if pd.notnull(target_skor) else 0}**")
+                        st.markdown(custom_progress_bar("Total Skor", skor_total, target_skor, emoji="🚶"), unsafe_allow_html=True)
+                        st.write(f"Reward: **Rp {reward if pd.notnull(reward) else 0:,.0f}**".replace(",", "."))
+                        # Safely format date without assuming datetime object
+                        tanggal_str = str(row['tanggal']) if pd.notnull(row['tanggal']) else '-'
+                        try:
+                            tanggal_dt = pd.to_datetime(tanggal_str)
+                            tanggal_formatted = tanggal_dt.strftime('%Y-%m-%d')
+                        except (ValueError, TypeError):
+                            tanggal_formatted = tanggal_str
+                        st.markdown(f"📅 Data Tanggal: **{tanggal_formatted}**")
+                else:
+                    st.warning("No data available for the selected filters.")
