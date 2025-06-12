@@ -276,4 +276,4 @@ if page == "Individual Dashboard":
             st.warning("No sales person found with the provided Gmail.")
     else:
         # This message is displayed when no Gmail has been entered yet
-        st.info("Please enter a Gmail address in the sidebar to view the sales performance dashboard.")
+        st.info("Masukkan gmail anda yang terdaftar di aplikasi TALENTA untuk melihat progress anda.")
