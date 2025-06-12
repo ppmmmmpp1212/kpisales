@@ -196,85 +196,84 @@ with st.sidebar:
 
 # Main Content
 if page == "Individual Dashboard":
-    # Filter data by Gmail if provided
-    filtered_df = df
-    if search_gmail:
-        filtered_df = df[df['gmail'].str.lower() == search_gmail.lower()]
-        if filtered_df.empty:
-            st.warning("No sales person found with the provided Gmail.")
-    
-    # Main Dashboard
+    # Main Dashboard Title
     st.markdown('<div class="main-title">Sales Performance Dashboard</div>', unsafe_allow_html=True)
     
-    if not filtered_df.empty:
-        row = filtered_df.iloc[0]
-        with st.container():
-            # Pass additional fields to sales_scorecard
-            kode_sf = row['kode_sf'] if 'kode_sf' in row and pd.notnull(row['kode_sf']) else '-'
-            kode_sap = row['kode_sap'] if 'kode_sap' in row and pd.notnull(row['kode_sap']) else '-'
-            gmail = row['gmail'] if 'gmail' in row and pd.notnull(row['gmail']) else '-'
-            st.markdown(sales_scorecard(row['nama_sales'], row['Cluster'], row['kode_sf'], row['kode_sap'], row['gmail']), unsafe_allow_html=True)
-            
-            # Assign variables with proper column checks
-            absensi = row['absensi'] if 'absensi' in row else 0
-            absen_target = row['target_absen'] if 'target_absen' in row else 1
-            target_sa = row['target_sa'] if 'target_sa' in row and pd.notnull(row['target_sa']) and row['target_sa'] != 0 else 1
-            aktual_sa = row['aktual_sa'] if 'aktual_sa' in row else 0
-            target_fv = row['target_fv'] if 'target_fv' in row and pd.notnull(row['target_fv']) and row['target_fv'] != 0 else 1
-            aktual_fv = row['aktual_fv'] if 'aktual_fv' in row else 0
-            total_outlet_bulan = row['total_outlet_bulan'] if 'total_outlet_bulan' in row and pd.notnull(row['total_outlet_bulan']) and row['total_outlet_bulan'] != 0 else 1
-            jumlah_kunjungan_outlet = row['jumlah_kunjungan_outlet'] if 'jumlah_kunjungan_outlet' in row else 0
-            Target_outletbaru = row['Target_outletbaru'] if 'Target_outletbaru' in row and pd.notnull(row['Target_outletbaru']) and row['Target_outletbaru'] != 0 else 1
-            total_outlet_baru = row['total_outlet_baru'] if 'total_outlet_baru' in row else 0
-            skor_total = row['skor_total'] if 'skor_total' in row else 0
-            target_skor = row['target_skor'] if 'target_skor' in row and pd.notnull(row['target_skor']) and row['target_skor'] != 0 else 1
-            reward = row['reward'] if 'reward' in row else 0
-            
-            st.markdown("---")
-            st.markdown("<h3 style='text-align: center;'>🎯 Pencapaian Parameter</h3>", unsafe_allow_html=True)
-            st.markdown("")
-            st.markdown("")
-            
-            col1, col2 = st.columns(2)
+    # Filter data by Gmail if provided
+    # Only filter if search_gmail is not empty
+    if search_gmail:
+        filtered_df = df[df['gmail'].str.lower() == search_gmail.lower()]
+        
+        if not filtered_df.empty:
+            row = filtered_df.iloc[0]
+            with st.container():
+                # Pass additional fields to sales_scorecard
+                kode_sf = row['kode_sf'] if 'kode_sf' in row and pd.notnull(row['kode_sf']) else '-'
+                kode_sap = row['kode_sap'] if 'kode_sap' in row and pd.notnull(row['kode_sap']) else '-'
+                gmail = row['gmail'] if 'gmail' in row and pd.notnull(row['gmail']) else '-'
+                st.markdown(sales_scorecard(row['nama_sales'], row['Cluster'], row['kode_sf'], row['kode_sap'], row['gmail']), unsafe_allow_html=True)
+                
+                # Assign variables with proper column checks
+                absensi = row['absensi'] if 'absensi' in row else 0
+                absen_target = row['target_absen'] if 'target_absen' in row else 1
+                target_sa = row['target_sa'] if 'target_sa' in row and pd.notnull(row['target_sa']) and row['target_sa'] != 0 else 1
+                aktual_sa = row['aktual_sa'] if 'aktual_sa' in row else 0
+                target_fv = row['target_fv'] if 'target_fv' in row and pd.notnull(row['target_fv']) and row['target_fv'] != 0 else 1
+                aktual_fv = row['aktual_fv'] if 'aktual_fv' in row else 0
+                total_outlet_bulan = row['total_outlet_bulan'] if 'total_outlet_bulan' in row and pd.notnull(row['total_outlet_bulan']) and row['total_outlet_bulan'] != 0 else 1
+                jumlah_kunjungan_outlet = row['jumlah_kunjungan_outlet'] if 'jumlah_kunjungan_outlet' in row else 0
+                Target_outletbaru = row['Target_outletbaru'] if 'Target_outletbaru' in row and pd.notnull(row['Target_outletbaru']) and row['Target_outletbaru'] != 0 else 1
+                total_outlet_baru = row['total_outlet_baru'] if 'total_outlet_baru' in row else 0
+                skor_total = row['skor_total'] if 'skor_total' in row else 0
+                target_skor = row['target_skor'] if 'target_skor' in row and pd.notnull(row['target_skor']) and row['target_skor'] != 0 else 1
+                reward = row['reward'] if 'reward' in row else 0
+                
+                st.markdown("---")
+                st.markdown("<h3 style='text-align: center;'>🎯 Pencapaian Parameter</h3>", unsafe_allow_html=True)
+                st.markdown("")
+                st.markdown("")
+                
+                col1, col2 = st.columns(2)
 
-            with col1:
-                st.markdown(styled_progress_info("Absensi", absensi, absen_target, "hari"), unsafe_allow_html=True)
-                custom_progress_bar("Absensi", absensi, absen_target)
-                st.markdown(styled_progress_info("SA Achievement", aktual_sa, target_sa, "unit"), unsafe_allow_html=True)
-                custom_progress_bar("SA Achievement", aktual_sa, target_sa)
-                st.markdown(styled_progress_info("VF Achievement", aktual_fv, target_fv, "unit"), unsafe_allow_html=True)
-                custom_progress_bar("VF Achievement", aktual_fv, target_fv)
-            
-            with col2:
-                st.markdown(styled_progress_info("Kunjungan Outlet", jumlah_kunjungan_outlet, total_outlet_bulan, "outlet"), unsafe_allow_html=True)
-                custom_progress_bar("Kunjungan Outlet", jumlah_kunjungan_outlet, total_outlet_bulan)
-                st.markdown(styled_progress_info("Outlet Baru", total_outlet_baru, Target_outletbaru, "outlet"), unsafe_allow_html=True)
-                custom_progress_bar("Outlet Baru", total_outlet_baru, Target_outletbaru)
-                        
-            st.markdown("---")
-            st.markdown("<h3 style='text-align: center;'>🎯 Skor Total & Reward</h3>", unsafe_allow_html=True)
-            
-            # Calculate percentage for progress bar
-            skor_num = pd.to_numeric(skor_total, errors='coerce')
-            target_skor_num = pd.to_numeric(target_skor, errors='coerce')
-            percent = (skor_num / target_skor_num * 100 if target_skor_num and pd.notnull(target_skor_num) and target_skor_num != 0 else 0)
-            percent_display = min(percent, 100)  # For display purposes (in %)
-            percent_progress = min(percent / 100, 1.0)  # For st.progress (0.0 to 1.0)
-            
-            # Display styled progress info
-            st.markdown(styled_progress_info("Skor Total", skor_total, target_skor, "poin"), unsafe_allow_html=True)
-            
-            # Display reward and date
-            st.write(f"Reward: **Rp {reward if pd.notnull(reward) else 0:,.0f}**".replace(",", "."))
-            tanggal_str = str(row['tanggal']) if pd.notnull(row['tanggal']) else '-'
-            try:
-                tanggal_dt = pd.to_datetime(tanggal_str)
-                tanggal_formatted = tanggal_dt.strftime('%Y-%m-%d')
-            except (ValueError, TypeError):
-                tanggal_formatted = tanggal_str
-            st.markdown(f"📅 Data Tanggal: **{tanggal_formatted}**")
-    else:
-        if not search_gmail:
-            st.info("Please enter a Gmail address to view the sales performance dashboard.")
+                with col1:
+                    st.markdown(styled_progress_info("Absensi", absensi, absen_target, "hari"), unsafe_allow_html=True)
+                    custom_progress_bar("Absensi", absensi, absen_target)
+                    st.markdown(styled_progress_info("SA Achievement", aktual_sa, target_sa, "unit"), unsafe_allow_html=True)
+                    custom_progress_bar("SA Achievement", aktual_sa, target_sa)
+                    st.markdown(styled_progress_info("VF Achievement", aktual_fv, target_fv, "unit"), unsafe_allow_html=True)
+                    custom_progress_bar("VF Achievement", aktual_fv, target_fv)
+                
+                with col2:
+                    st.markdown(styled_progress_info("Kunjungan Outlet", jumlah_kunjungan_outlet, total_outlet_bulan, "outlet"), unsafe_allow_html=True)
+                    custom_progress_bar("Kunjungan Outlet", jumlah_kunjungan_outlet, total_outlet_bulan)
+                    st.markdown(styled_progress_info("Outlet Baru", total_outlet_baru, Target_outletbaru, "outlet"), unsafe_allow_html=True)
+                    custom_progress_bar("Outlet Baru", total_outlet_baru, Target_outletbaru)
+                            
+                st.markdown("---")
+                st.markdown("<h3 style='text-align: center;'>🎯 Skor Total & Reward</h3>", unsafe_allow_html=True)
+                
+                # Calculate percentage for progress bar
+                skor_num = pd.to_numeric(skor_total, errors='coerce')
+                target_skor_num = pd.to_numeric(target_skor, errors='coerce')
+                percent = (skor_num / target_skor_num * 100 if target_skor_num and pd.notnull(target_skor_num) and target_skor_num != 0 else 0)
+                percent_display = min(percent, 100)  # For display purposes (in %)
+                percent_progress = min(percent / 100, 1.0)  # For st.progress (0.0 to 1.0)
+                
+                # Display styled progress info
+                st.markdown(styled_progress_info("Skor Total", skor_total, target_skor, "poin"), unsafe_allow_html=True)
+                
+                # Display reward and date
+                st.write(f"Reward: **Rp {reward if pd.notnull(reward) else 0:,.0f}**".replace(",", "."))
+                tanggal_str = str(row['tanggal']) if pd.notnull(row['tanggal']) else '-'
+                try:
+                    tanggal_dt = pd.to_datetime(tanggal_str)
+                    tanggal_formatted = tanggal_dt.strftime('%Y-%m-%d')
+                except (ValueError, TypeError):
+                    tanggal_formatted = tanggal_str
+                st.markdown(f"📅 Data Tanggal: **{tanggal_formatted}**")
         else:
-            st.warning("No data available for the provided Gmail.")
+            # This handles cases where a Gmail is entered but no matching data is found
+            st.warning("No sales person found with the provided Gmail.")
+    else:
+        # This message is displayed when no Gmail has been entered yet
+        st.info("Please enter a Gmail address in the sidebar to view the sales performance dashboard.")
