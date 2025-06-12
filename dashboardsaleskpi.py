@@ -13,78 +13,85 @@ st.set_page_config(
 # Custom CSS (unchanged)
 st.markdown("""
     <style>
-    .stApp {
-        background-color: #F8F8F8;
+    .card-container {
+        background-color: #FFFFFF;
+        border-radius: 12px;
+        padding: 1.5em;
+        margin-bottom: 1.5em;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
     }
-    .stSidebar {
-        background-color: #E0E0E0;
-        padding: 20px;
+    .card-container:hover {
+        box-shadow: 0 7px 14px rgba(0,0,0,0.1), 0 3px 6px rgba(0,0,0,0.08);
+        transform: translateY(-2px);
+    }
+    .card-title {
+        font-size: 1.8em;
+        font-weight: bold;
+        color: #1E3A8A;
+        margin-bottom: 1em;
+    }
+    .metric-label {
+        font-size: 0.9em;
+        color: #6B7280;
+        margin-bottom: 0.3em;
     }
     .metric-card {
         background-color: #FFFFFF;
-        border-radius: 8px;
-        padding: 20px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        margin-bottom: 20px;
-        text-align: center;
-    }
-    .metric-label {
-        font-size: 1em;
-        color: #6B7280;
-        margin-bottom: 5px;
-    }
-    .metric-value {
-        font-size: 2em;
-        font-weight: bold;
-        color: #1F2937;
-    }
-    .metric-trend {
-        font-size: 0.9em;
-        color: #10B981;
-    }
-    .scorecard {
-        background-color: #FFFFFF;
-        border-radius: 8px;
-        padding: 25px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        margin-bottom: 30px;
-        border-left: 8px solid #3B82F6;
-    }
-    .progress-info {
-        background-color: #FFFFFF;
-        border-radius: 8px;
-        padding: 15px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        margin-bottom: 15px;
         border: 1px solid #E5E7EB;
+        border-radius: 8px;
+        padding: 1em;
+        margin-bottom: 1em;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
     }
-    .progress-title {
-        font-size: 0.95em;
-        color: #374151;
-        font-weight: 600;
+    .metric-card:hover {
+        box-shadow: 0 7px 14px rgba(0,0,0,0.1), 0 3px 6px rgba(0,0,0,0.08);
+        transform: translateY(-2px);
     }
-    .progress-value {
-        font-size: 1.1em;
+    .main-title {
+        font-size: 2.5em;
         font-weight: bold;
-        margin-top: 5px;
-    }
-    h1 {
         color: #1E3A8A;
         text-align: center;
-        font-size: 2.5em;
-        margin-bottom: 30px;
+        margin-bottom: 1em;
     }
-    h2 {
+    .stDataFrame {
+        width: 100%;
+        font-size: 0.95em;
+    }
+    .stDataFrame table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+    }
+    .stDataFrame th, .stDataFrame td {
+        padding: 0.8em;
+        text-align: left;
+        border-bottom: 1px solid #E5E7EB;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .stDataFrame th {
+        background-color: #F9FAFB;
+        font-weight: bold;
         color: #1E3A8A;
-        font-size: 1.8em;
-        margin-top: 40px;
-        margin-bottom: 20px;
-        border-bottom: 2px solid #1E3A8A;
-        padding-bottom: 5px;
+        position: sticky;
+        top: 0;
+        z-index: 10;
     }
-    .stSelectbox, .stTextInput, .stDateInput {
-        background-color: #FFFFFF;
-        border-radius: 5px;
+    .stDataFrame tr:hover {
+        background-color: #F3F4F6;
+    }
+    .stDataFrame tr:nth-child(1) {
+        background-color: #FEF3C7;
+    }
+    .stDataFrame tr:nth-child(2) {
+        background-color: #E4E7EB;
+    }
+    .stDataFrame tr:nth-child(3) {
+        background-color: #FFEDD5;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -94,22 +101,32 @@ def metric_card(label, value, trend):
     return f"""
     <div class="metric-card">
         <div class="metric-label">{label}</div>
-        <div class="metric-value">{value}</div>
-        <div class="metric-trend">{trend}</div>
+        <div style="font-size: 1.5em; font-weight: bold; color: #1E3A8A;">{value}</div>
+        <div style="font-size: 0.9em; color: #6B7280;">{trend}</div>
     </div>
-"""
+    """
 
-# Function to create sales scorecard (MODIFIED)
-def sales_scorecard(name, cluster, kode_sf, kode_sap, gmail):
+# Function to create sales scorecard (unchanged)
+def sales_scorecard(name, cluster):
     return f"""
-    <div class="scorecard">
-        <div style='font-size: 1.3em; font-weight: 700; color: #1E3A8A;'>👤 {name}</div>
-        <div style='font-size: 0.95em; color: #6B7280;'>📍 Cluster: <b>{cluster}</b></div>
-        <div style='font-size: 0.95em; color: #6B7280;'>🆔 Kode SF: <b>{kode_sf}</b></div>
-        <div style='font-size: 0.95em; color: #6B7280;'>SAP ID: <b>{kode_sap}</b></div>
-        <div style='font-size: 0.95em; color: #6B7280;'>📧 Gmail: <b>{gmail}</b></div>
+    <div style='
+        background-color: #F9FAFB;
+        border: 1px solid #E5E7EB;
+        border-radius: 12px;
+        padding: 1.2em 1.5em;
+        margin-bottom: 1em;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        display: flex;
+        align-items: center;
+    '>
+        <div style='flex-grow: 1;'>
+            <div style='font-size: 1.3em; font-weight: 700; color: #1E3A8A;'>👤 {name}</div>
+            <div style='font-size: 0.95em; color: #6B7280;'>📍 Cluster: <b>{cluster}</b></div>
+        </div>
     </div>
-"""
+    """
+
+
 
 # Function to create styled progress info (unchanged)
 def styled_progress_info(title, actual, target, unit="hari"):
@@ -118,11 +135,14 @@ def styled_progress_info(title, actual, target, unit="hari"):
     percent = (actual_num / target_num * 100 if target_num and pd.notnull(target_num) and target_num != 0 else 0)
     color = "#10B981" if percent >= 100 else "#3B82F6"
     return f"""
-    <div class="progress-info">
-        <div class="progress-title">{title}</div>
-        <div class="progress-value" style="color: {color};">{actual if pd.notnull(actual) else 0} dari {target if pd.notnull(target) else 0} {unit} ({percent:.2f}%)</div>
+    <div style='margin-bottom: 0.5em;'>
+        <div style='font-size: 1.1em; font-weight: bold; color: #1E3A8A;'>{title}</div>
+        <div style='font-size: 0.95em; color: #374151;'>
+            <span style='font-weight: 600; color: {color};'>{actual if pd.notnull(actual) else 0}</span> dari <b>{target if pd.notnull(target) else 0}</b> {unit} 
+            <span style='float: right; color: {color};'>({percent:.2f}%)</span>
+        </div>
     </div>
-"""
+    """
 
 # Function to create custom progress bar
 def custom_progress_bar(label, actual, target, emoji="🚶"):
@@ -140,8 +160,7 @@ def load_data_from_gsheet():
     try:
         df = pd.read_csv(url, parse_dates=["tanggal"])
         required_columns = [
-            'tanggal', 'Cluster', 'nama_sales', 'kode_sf', 'kode_sap', 'gmail', # Added new columns here
-            'absensi', 'target_absen', '%absen',
+            'tanggal', 'Cluster', 'nama_sales', 'absensi', 'target_absen', '%absen',
             'target_sa', 'aktual_sa', '%SA', 'target_fv', 'aktual_fv', '%VF',
             'total_outlet_bulan', 'jumlah_kunjungan_outlet', '%kunjungan',
             'Target_outletbaru', 'total_outlet_baru', '%outletbaru',
@@ -150,7 +169,7 @@ def load_data_from_gsheet():
         available_columns = [col for col in required_columns if col in df.columns]
         if len(available_columns) < len(required_columns):
             missing = [col for col in required_columns if col not in df.columns]
-            st.warning(f"Missing columns in data: {missing}. Please ensure these columns are in your Google Sheet.")
+            st.warning(f"Missing columns in data: {missing}")
         df = df[available_columns]
         return df
     except Exception as e:
@@ -164,18 +183,19 @@ with st.sidebar:
     st.image("https://via.placeholder.com/150", caption="Sales Dashboard Logo")
     st.title("📈 Sales Performance")
     st.markdown("---")
+    
     page = "Individual Dashboard"
+    
     cluster_options = ['All Clusters'] + sorted(df['Cluster'].unique().tolist() if not df.empty else [])
     selected_cluster = st.selectbox("Filter by Cluster", cluster_options)
-
+    
     if selected_cluster != 'All Clusters':
         filtered_df = df[df['Cluster'] == selected_cluster]
     else:
         filtered_df = df
-
     sales_options = sorted(filtered_df['nama_sales'].unique().tolist() if not filtered_df.empty else [])
     selected_sales = st.selectbox("Select Sales Person", sales_options if sales_options else ["No data available"])
-
+    
     st.markdown("---")
     st.write(f"**Last Updated:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     st.markdown("**Data Source:** Google Sheets")
@@ -187,22 +207,16 @@ if page == "Individual Dashboard":
     if selected_cluster != 'All Clusters':
         df = df[df['Cluster'] == selected_cluster]
     df = df[df['nama_sales'] == selected_sales]
-
+    
     # Main Dashboard
-    st.markdown('<h1 style="text-align: center; color: #1E3A8A;">Sales Performance Dashboard</h1>', unsafe_allow_html=True)
-
+    st.markdown('<div class="main-title">Sales Performance Dashboard</div>', unsafe_allow_html=True)
+    
     if not df.empty:
         row = df.iloc[0]
-
         with st.container():
-            # Assign variables with proper column checks for new fields
-            kode_sf = row['kode_sf'] if 'kode_sf' in row and pd.notnull(row['kode_sf']) else 'N/A'
-            kode_sap = row['kode_sap'] if 'kode_sap' in row and pd.notnull(row['kode_sap']) else 'N/A'
-            gmail = row['gmail'] if 'gmail' in row and pd.notnull(row['gmail']) else 'N/A'
-
-            st.markdown(sales_scorecard(row['nama_sales'], row['Cluster'], row['kode_sf'], row['kode_sap'], row['gmail']), unsafe_allow_html=True)
+            st.markdown(sales_scorecard(row['nama_sales'], row['Cluster']), unsafe_allow_html=True)
             
-            # Assign variables with proper column checks for existing fields
+            # Assign variables with proper column checks
             absensi = row['absensi'] if 'absensi' in row else 0
             absen_target = row['target_absen'] if 'target_absen' in row else 1
             target_sa = row['target_sa'] if 'target_sa' in row and pd.notnull(row['target_sa']) and row['target_sa'] != 0 else 1
@@ -216,13 +230,14 @@ if page == "Individual Dashboard":
             skor_total = row['skor_total'] if 'skor_total' in row else 0
             target_skor = row['target_skor'] if 'target_skor' in row and pd.notnull(row['target_skor']) and row['target_skor'] != 0 else 1
             reward = row['reward'] if 'reward' in row else 0
-
+            
             st.markdown("---")
-            st.markdown("<h2 style='text-align: center; color: #1E3A8A;'>🎯 Pencapaian Parameter</h2>", unsafe_allow_html=True)
+            st.markdown("<h3 style='text-align: center;'>🎯 Pencapaian Parameter</h3>", unsafe_allow_html=True)
             st.markdown("")
             st.markdown("")
-
+            
             col1, col2 = st.columns(2)
+
             with col1:
                 st.markdown(styled_progress_info("Absensi", absensi, absen_target, "hari"), unsafe_allow_html=True)
                 custom_progress_bar("Absensi", absensi, absen_target)
@@ -230,24 +245,27 @@ if page == "Individual Dashboard":
                 custom_progress_bar("SA Achievement", aktual_sa, target_sa)
                 st.markdown(styled_progress_info("FV Achievement", aktual_fv, target_fv, "unit"), unsafe_allow_html=True)
                 custom_progress_bar("FV Achievement", aktual_fv, target_fv)
+            
             with col2:
                 st.markdown(styled_progress_info("Kunjungan Outlet", jumlah_kunjungan_outlet, total_outlet_bulan, "outlet"), unsafe_allow_html=True)
                 custom_progress_bar("Kunjungan Outlet", jumlah_kunjungan_outlet, total_outlet_bulan)
                 st.markdown(styled_progress_info("Outlet Baru", total_outlet_baru, Target_outletbaru, "outlet"), unsafe_allow_html=True)
                 custom_progress_bar("Outlet Baru", total_outlet_baru, Target_outletbaru)
-
+                        
             st.markdown("---")
-            st.markdown("<h2 style='text-align: center; color: #1E3A8A;'>🎯 Skor Total & Reward</h2>", unsafe_allow_html=True)
-
+            st.markdown("<h3 style='text-align: center;'>🎯 Skor Total & Reward</h3>", unsafe_allow_html=True)
+            
             # Calculate percentage for progress bar
             skor_num = pd.to_numeric(skor_total, errors='coerce')
             target_skor_num = pd.to_numeric(target_skor, errors='coerce')
             percent = (skor_num / target_skor_num * 100 if target_skor_num and pd.notnull(target_skor_num) and target_skor_num != 0 else 0)
             percent_display = min(percent, 100)  # For display purposes (in %)
             percent_progress = min(percent / 100, 1.0)  # For st.progress (0.0 to 1.0)
-
+            
             # Display styled progress info
             st.markdown(styled_progress_info("Skor Total", skor_total, target_skor, "poin"), unsafe_allow_html=True)
+       
+            
             # Display reward and date
             st.write(f"Reward: **Rp {reward if pd.notnull(reward) else 0:,.0f}**".replace(",", "."))
             tanggal_str = str(row['tanggal']) if pd.notnull(row['tanggal']) else '-'
