@@ -107,7 +107,7 @@ def metric_card(label, value, trend):
     """
 
 # Function to create sales scorecard (unchanged)
-def sales_scorecard(name, cluster, kode_sf, kode_sap, gmail):
+def sales_scorecard(name, cluster):
     return f"""
     <div style='
         background-color: #F9FAFB;
@@ -122,12 +122,11 @@ def sales_scorecard(name, cluster, kode_sf, kode_sap, gmail):
         <div style='flex-grow: 1;'>
             <div style='font-size: 1.3em; font-weight: 700; color: #1E3A8A;'>👤 {name}</div>
             <div style='font-size: 0.95em; color: #6B7280;'>📍 Cluster: <b>{cluster}</b></div>
-            <div style='font-size: 0.95em; color: #6B7280;'>🆔 Kode SF: <b>{kode_sf}</b></div>
-            <div style='font-size: 0.95em; color: #6B7280;'>🆔 Kode SAP: <b>{kode_sap}</b></div>
-            <div style='font-size: 0.95em; color: #6B7280;'>📧 Gmail: <b>{gmail}</b></div>
         </div>
     </div>
     """
+
+tambahkan informasi kode_sf, kode_sap, dan gmail
 
 # Function to create styled progress info (unchanged)
 def styled_progress_info(title, actual, target, unit="hari"):
