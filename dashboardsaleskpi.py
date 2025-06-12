@@ -237,9 +237,7 @@ if page == "Individual Dashboard":
                 custom_progress_bar("Outlet Baru", total_outlet_baru, Target_outletbaru)
 
             st.markdown("---")
-            st.markdown("
-                <h2 style='text-align: center; color: #1E3A8A;'>🎯 Skor Total & Reward</h2>
-            ", unsafe_allow_html=True)
+            st.markdown("<h2 style='text-align: center; color: #1E3A8A;'>🎯 Skor Total & Reward</h2>", unsafe_allow_html=True)
 
             # Calculate percentage for progress bar
             skor_num = pd.to_numeric(skor_total, errors='coerce')
