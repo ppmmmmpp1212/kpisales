@@ -126,7 +126,7 @@ def sales_scorecard(name, cluster):
     </div>
     """
 
-tambahkan informasi kode_sf, kode_sap, dan gmail
+
 
 # Function to create styled progress info (unchanged)
 def styled_progress_info(title, actual, target, unit="hari"):
