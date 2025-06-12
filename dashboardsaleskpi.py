@@ -200,8 +200,7 @@ with st.sidebar:
     
     st.markdown("---")
     st.write(f"**Last Updated:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-    st.markdown("**Data Source:** Google Sheets")
-    st.markdown("**Developed by:** Your Team Name")
+
 
 # Main Content
 if page == "Individual Dashboard":
