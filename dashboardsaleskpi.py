@@ -107,7 +107,7 @@ def metric_card(label, value, trend):
     """
 
 # Function to create sales scorecard (unchanged)
-def sales_scorecard(name, cluster):
+def sales_scorecard(name, cluster, kode_sf, kode_sap, gmail):
     return f"""
     <div style='
         background-color: #F9FAFB;
@@ -122,6 +122,9 @@ def sales_scorecard(name, cluster):
         <div style='flex-grow: 1;'>
             <div style='font-size: 1.3em; font-weight: 700; color: #1E3A8A;'>👤 {name}</div>
             <div style='font-size: 0.95em; color: #6B7280;'>📍 Cluster: <b>{cluster}</b></div>
+            <div style='font-size: 0.95em; color: #6B7280;'>🆔 Kode SF: <b>{kode_sf}</b></div>
+            <div style='font-size: 0.95em; color: #6B7280;'>🆔 Kode SAP: <b>{kode_sap}</b></div>
+            <div style='font-size: 0.95em; color: #6B7280;'>📧 Gmail: <b>{gmail}</b></div>
         </div>
     </div>
     """
@@ -207,12 +210,12 @@ if page == "Individual Dashboard":
     df = df[df['nama_sales'] == selected_sales]
     
     # Main Dashboard
-    st.markdown(sales_scorecard(row['nama_sales'], row['Cluster']), unsafe_allow_html=True)
+    st.markdown('<div class="main-title">Sales Performance Dashboard</div>', unsafe_allow_html=True)
     
     if not df.empty:
         row = df.iloc[0]
         with st.container():
-            st.markdown(sales_scorecard(row['nama_sales'], row['Cluster'], unsafe_allow_html=True))
+            st.markdown(sales_scorecard(row['nama_sales'], row['Cluster']), unsafe_allow_html=True)
             
             # Assign variables with proper column checks
             absensi = row['absensi'] if 'absensi' in row else 0
