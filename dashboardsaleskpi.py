@@ -270,7 +270,7 @@ if page == "Individual Dashboard":
                     tanggal_formatted = tanggal_dt.strftime('%Y-%m-%d')
                 except (ValueError, TypeError):
                     tanggal_formatted = tanggal_str
-                st.markdown(f"📅 Data Tanggal: **{tanggal_formatted}**")
+                st.markdown(f"📅 Periode Akhir Tanggal: **{tanggal_formatted}**")
         else:
             # This handles cases where a Gmail is entered but no matching data is found
             st.warning("No sales person found with the provided Gmail.")
