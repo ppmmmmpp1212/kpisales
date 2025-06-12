@@ -207,7 +207,7 @@ if page == "Individual Dashboard":
     df = df[df['nama_sales'] == selected_sales]
     
     # Main Dashboard
-    st.markdown('<div class="main-title">Sales Performance Dashboard</div>', unsafe_allow_html=True)
+    st.markdown(sales_scorecard(row['nama_sales'], row['Cluster']), unsafe_allow_html=True)
     
     if not df.empty:
         row = df.iloc[0]
