@@ -96,7 +96,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Function to create a metric card (unchanged)
+# Function to create a metric card
 def metric_card(label, value, trend):
     return f"""
     <div class="metric-card">
@@ -106,7 +106,7 @@ def metric_card(label, value, trend):
     </div>
     """
 
-# Function to create sales scorecard (unchanged)
+# Function to create sales scorecard
 def sales_scorecard(name, cluster, kode_sf, kode_sap, gmail):
     return f"""
     <div style='
@@ -129,9 +129,7 @@ def sales_scorecard(name, cluster, kode_sf, kode_sap, gmail):
     </div>
     """
 
-
-
-# Function to create styled progress info (unchanged)
+# Function to create styled progress info
 def styled_progress_info(title, actual, target, unit="hari"):
     actual_num = pd.to_numeric(actual, errors='coerce')
     target_num = pd.to_numeric(target, errors='coerce')
@@ -163,7 +161,8 @@ def load_data_from_gsheet():
     try:
         df = pd.read_csv(url, parse_dates=["tanggal"])
         required_columns = [
-            'tanggal', 'Cluster', 'nama_sales', 'absensi', 'target_absen', '%absen',
+            'tanggal', 'Cluster', 'nama_sales', 'kode_sf', 'kode_sap', 'gmail',
+            'absensi', 'target_absen', '%absen',
             'target_sa', 'aktual_sa', '%SA', 'target_fv', 'aktual_fv', '%VF',
             'total_outlet_bulan', 'jumlah_kunjungan_outlet', '%kunjungan',
             'Target_outletbaru', 'total_outlet_baru', '%outletbaru',
@@ -181,7 +180,7 @@ def load_data_from_gsheet():
 
 df = load_data_from_gsheet()
 
-# Sidebar (unchanged)
+# Sidebar
 with st.sidebar:
     st.image("https://via.placeholder.com/150", caption="Sales Dashboard Logo")
     st.title("📈 Sales Performance")
@@ -217,6 +216,10 @@ if page == "Individual Dashboard":
     if not df.empty:
         row = df.iloc[0]
         with st.container():
+            # Pass additional fields to sales_scorecard
+            kode_sf = row['kode_sf'] if 'kode_sf' in row and pd.notnull(row['kode_sf']) else '-'
+            kode_sap = row['kode_sap'] if 'kode_sap' in row and pd.notnull(row['kode_sap']) else '-'
+            gmail = row['gmail'] if 'gmail' in row and pd.notnull(row['gmail']) else '-'
             st.markdown(sales_scorecard(row['nama_sales'], row['Cluster'], row['kode_sf'], row['kode_sap'], row['gmail']), unsafe_allow_html=True)
             
             # Assign variables with proper column checks
@@ -267,7 +270,6 @@ if page == "Individual Dashboard":
             
             # Display styled progress info
             st.markdown(styled_progress_info("Skor Total", skor_total, target_skor, "poin"), unsafe_allow_html=True)
-       
             
             # Display reward and date
             st.write(f"Reward: **Rp {reward if pd.notnull(reward) else 0:,.0f}**".replace(",", "."))
