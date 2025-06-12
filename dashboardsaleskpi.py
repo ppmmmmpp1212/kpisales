@@ -107,7 +107,7 @@ def metric_card(label, value, trend):
     """
 
 # Function to create sales scorecard (unchanged)
-def sales_scorecard(name, cluster):
+def sales_scorecard(name, cluster, kode_sf, kode_sap, gmail):
     return f"""
     <div style='
         background-color: #F9FAFB;
@@ -122,6 +122,9 @@ def sales_scorecard(name, cluster):
         <div style='flex-grow: 1;'>
             <div style='font-size: 1.3em; font-weight: 700; color: #1E3A8A;'>👤 {name}</div>
             <div style='font-size: 0.95em; color: #6B7280;'>📍 Cluster: <b>{cluster}</b></div>
+            <div style='font-size: 0.95em; color: #6B7280;'>🆔 Kode SF: <b>{kode_sf}</b></div>
+            <div style='font-size: 0.95em; color: #6B7280;'>🆔 Kode SAP: <b>{kode_sap}</b></div>
+            <div style='font-size: 0.95em; color: #6B7280;'>📧 Gmail: <b>{gmail}</b></div>
         </div>
     </div>
     """
