@@ -202,7 +202,7 @@ if page == "Individual Dashboard":
             kode_sap = row['kode_sap'] if 'kode_sap' in row and pd.notnull(row['kode_sap']) else 'N/A'
             gmail = row['gmail'] if 'gmail' in row and pd.notnull(row['gmail']) else 'N/A'
 
-            st.markdown(sales_scorecard(row['nama_sales'], row['Cluster'], kode_sf, kode_sap, gmail), unsafe_allow_html=True)
+            st.markdown(sales_scorecard(row['nama_sales'], row['Cluster'], row['kode_sf'], row['kode_sap'], row['gmail]), unsafe_allow_html=True)
             
             # Assign variables with proper column checks for existing fields
             absensi = row['absensi'] if 'absensi' in row else 0
