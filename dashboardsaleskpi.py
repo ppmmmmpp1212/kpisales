@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 from datetime import datetime
+import uuid
 
 # Page Configuration
 st.set_page_config(
@@ -188,26 +189,45 @@ with st.sidebar:
     
     page = "Individual Dashboard"
     
-    cluster_options = ['All Clusters'] + sorted(df['Cluster'].unique().tolist() if not df.empty else [])
-    selected_cluster = st.selectbox("Filter by Cluster", cluster_options)
+    # Gmail search input
+    search_gmail = st.text_input("Search by Gmail", placeholder="Enter Gmail address...")
     
-    if selected_cluster != 'All Clusters':
+    # Initialize filtered DataFrame
+    filtered_df = df
+    
+    # Apply Gmail filter if provided
+    if search_gmail:
+        filtered_df = df[df['gmail'].str.lower() == search_gmail.lower()]
+        if filtered_df.empty:
+            st.warning("No sales person found with the provided Gmail.")
+    
+    # Cluster filter (only shown if no Gmail search or no match found)
+    cluster_options = ['All Clusters'] + sorted(df['Cluster'].unique().tolist() if not df.empty else [])
+    selected_cluster = st.selectbox("Filter by Cluster", cluster_options, disabled=bool(search_gmail and not filtered_df.empty))
+    
+    if selected_cluster != 'All Clusters' and (not search_gmail or filtered_df.empty):
         filtered_df = df[df['Cluster'] == selected_cluster]
-    else:
-        filtered_df = df
+    
+    # Sales person filter (only shown if no Gmail search or no match found)
     sales_options = sorted(filtered_df['nama_sales'].unique().tolist() if not filtered_df.empty else [])
-    selected_sales = st.selectbox("Select Sales Person", sales_options if sales_options else ["No data available"])
+    selected_sales = st.selectbox(
+        "Select Sales Person",
+        sales_options if sales_options else ["No data available"],
+        disabled=bool(search_gmail and not filtered_df.empty)
+    )
+    
+    # If Gmail search found a match, set selected_sales to the corresponding name
+    if search_gmail and not filtered_df.empty:
+        selected_sales = filtered_df['nama_sales'].iloc[0]
     
     st.markdown("---")
     st.write(f"**Last Updated:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
-
 # Main Content
 if page == "Individual Dashboard":
-    # Filter data by cluster and sales person
-    if selected_cluster != 'All Clusters':
-        df = df[df['Cluster'] == selected_cluster]
-    df = df[df['nama_sales'] == selected_sales]
+    # Filter data by selected sales person
+    if selected_sales and selected_sales != "No data available":
+        df = df[df['nama_sales'] == selected_sales]
     
     # Main Dashboard
     st.markdown('<div class="main-title">Sales Performance Dashboard</div>', unsafe_allow_html=True)
