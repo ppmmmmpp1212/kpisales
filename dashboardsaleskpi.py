@@ -189,9 +189,7 @@ if page == "Individual Dashboard":
     df = df[df['nama_sales'] == selected_sales]
 
     # Main Dashboard
-    st.markdown('
-        <h1 style="text-align: center; color: #1E3A8A;">Sales Performance Dashboard</h1>
-    ', unsafe_allow_html=True)
+    st.markdown('<h1 style="text-align: center; color: #1E3A8A;">Sales Performance Dashboard</h1>', unsafe_allow_html=True)
 
     if not df.empty:
         row = df.iloc[0]
