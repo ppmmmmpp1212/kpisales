@@ -242,8 +242,8 @@ if page == "Individual Dashboard":
                 custom_progress_bar("Absensi", absensi, absen_target)
                 st.markdown(styled_progress_info("SA Achievement", aktual_sa, target_sa, "unit"), unsafe_allow_html=True)
                 custom_progress_bar("SA Achievement", aktual_sa, target_sa)
-                st.markdown(styled_progress_info("FV Achievement", aktual_fv, target_fv, "unit"), unsafe_allow_html=True)
-                custom_progress_bar("FV Achievement", aktual_fv, target_fv)
+                st.markdown(styled_progress_info("VF Achievement", aktual_fv, target_fv, "unit"), unsafe_allow_html=True)
+                custom_progress_bar("VF Achievement", aktual_fv, target_fv)
             
             with col2:
                 st.markdown(styled_progress_info("Kunjungan Outlet", jumlah_kunjungan_outlet, total_outlet_bulan, "outlet"), unsafe_allow_html=True)
