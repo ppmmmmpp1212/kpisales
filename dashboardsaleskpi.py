@@ -218,9 +218,7 @@ if page == "Individual Dashboard":
             reward = row['reward'] if 'reward' in row else 0
 
             st.markdown("---")
-            st.markdown("
-                <h2 style='text-align: center; color: #1E3A8A;'>🎯 Pencapaian Parameter</h2>
-            ", unsafe_allow_html=True)
+            st.markdown("<h2 style='text-align: center; color: #1E3A8A;'>🎯 Pencapaian Parameter</h2>", unsafe_allow_html=True)
             st.markdown("")
             st.markdown("")
 
