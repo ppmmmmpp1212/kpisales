@@ -182,7 +182,7 @@ df = load_data_from_gsheet()
 
 # Sidebar
 with st.sidebar:
-    st.image("https://via.placeholder.com/150", caption="Sales Dashboard Logo")
+    st.image("mmpp.png", caption="Sales Dashboard Logo")
     st.title("📈 Sales Performance")
     st.markdown("---")
     
