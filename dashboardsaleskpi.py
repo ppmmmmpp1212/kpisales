@@ -212,7 +212,7 @@ if page == "Individual Dashboard":
     if not df.empty:
         row = df.iloc[0]
         with st.container():
-            st.markdown(sales_scorecard(row['nama_sales'], row['Cluster'], unsafe_allow_html=True)
+            st.markdown(sales_scorecard(row['nama_sales'], row['Cluster'], unsafe_allow_html=True))
             
             # Assign variables with proper column checks
             absensi = row['absensi'] if 'absensi' in row else 0
