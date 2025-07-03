@@ -188,6 +188,41 @@ with st.sidebar:
     
     page = "Individual Dashboard"
     
+    # Date filter for selecting month and year
+    if not df.empty and 'tanggal' in df.columns:
+        # Extract unique months and years from 'tanggal' column
+        df['tanggal'] = pd.to_datetime(df['tanggal'], errors='coerce')
+        df['month_year'] = df['tanggal'].dt.strftime('%Y-%m')
+        unique_months = sorted(df['month_year'].dropna().unique(), reverse=True)
+        
+        # Map months to Indonesian names
+        month_map = {
+            '01': 'Januari', '02': 'Februari', '03': 'Maret', '04': 'April',
+            '05': 'Mei', '06': 'Juni', '07': 'Juli', '08': 'Agustus',
+            '09': 'September', '10': 'Oktober', '11': 'November', '12': 'Desember'
+        }
+        period_options = [
+            f"{month_map[month.split('-')[1]]} {month.split('-')[0]}" 
+            for month in unique_months
+        ]
+        
+        # Add "All Periods" option
+        period_options.insert(0, "All Periods")
+        selected_period = st.selectbox("Select Period", period_options)
+        
+        # Filter data by selected period
+        if selected_period != "All Periods":
+            selected_year, selected_month = selected_period.split()
+            selected_month_num = list(month_map.keys())[list(month_map.values()).index(selected_month)]
+            selected_month_year = f"{selected_year}-{selected_month_num}"
+            filtered_df = df[df['month_year'] == selected_month_year]
+        else:
+            filtered_df = df
+    else:
+        st.warning("No valid date data available for filtering.")
+        filtered_df = df
+        selected_period = "All Periods"
+    
     # Gmail search input
     search_gmail = st.text_input("Search by Gmail", placeholder="Enter Gmail address...")
     
@@ -200,9 +235,8 @@ if page == "Individual Dashboard":
     st.markdown('<div class="main-title">Sales Performance Dashboard</div>', unsafe_allow_html=True)
     
     # Filter data by Gmail if provided
-    # Only filter if search_gmail is not empty
     if search_gmail:
-        filtered_df = df[df['gmail'].str.lower() == search_gmail.lower()]
+        filtered_df = filtered_df[filtered_df['gmail'].str.lower() == search_gmail.lower()]
         
         if not filtered_df.empty:
             row = filtered_df.iloc[0]
@@ -272,8 +306,6 @@ if page == "Individual Dashboard":
                     tanggal_formatted = tanggal_str
                 st.markdown(f"📅 Periode Akhir Tanggal: **{tanggal_formatted}**")
         else:
-            # This handles cases where a Gmail is entered but no matching data is found
-            st.warning("No sales person found with the provided Gmail.")
+            st.warning("No sales person found with the provided Gmail for the selected period.")
     else:
-        # This message is displayed when no Gmail has been entered yet
         st.info("Masukkan gmail anda yang terdaftar di aplikasi TALENTA untuk melihat progress anda.")
