@@ -206,22 +206,24 @@ with st.sidebar:
             for month in unique_months
         ]
         
-        # Add "All Periods" option
-        period_options.insert(0, "All Periods")
-        selected_period = st.selectbox("Select Period", period_options)
+        # Set default to current month and year
+        current_month_year = datetime.now().strftime('%Y-%m')
+        current_month = month_map[current_month_year.split('-')[1]]
+        default_period = f"{current_month} {current_month_year.split('-')[0]}"
+        
+        # Ensure default period is in period_options, else select the most recent
+        default_index = period_options.index(default_period) if default_period in period_options else 0
+        selected_period = st.selectbox("Select Period", period_options, index=default_index)
         
         # Filter data by selected period
-        if selected_period != "All Periods":
-            selected_year, selected_month = selected_period.split()
-            selected_month_num = list(month_map.keys())[list(month_map.values()).index(selected_month)]
-            selected_month_year = f"{selected_year}-{selected_month_num}"
-            filtered_df = df[df['month_year'] == selected_month_year]
-        else:
-            filtered_df = df
+        selected_month, selected_year = selected_period.split()
+        selected_month_num = list(month_map.keys())[list(month_map.values()).index(selected_month)]
+        selected_month_year = f"{selected_year}-{selected_month_num}"
+        filtered_df = df[df['month_year'] == selected_month_year]
     else:
         st.warning("No valid date data available for filtering.")
         filtered_df = df
-        selected_period = "All Periods"
+        selected_period = f"Juli {datetime.now().year}"
     
     # Gmail search input
     search_gmail = st.text_input("Search by Gmail", placeholder="Enter Gmail address...")
