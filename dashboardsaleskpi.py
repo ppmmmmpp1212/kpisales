@@ -181,6 +181,7 @@ def load_data_from_gsheet():
 df = load_data_from_gsheet()
 
 # Sidebar
+# Sidebar
 with st.sidebar:
     st.image("mmpp.png", caption="Sales Dashboard Logo")
     st.title("📈 Sales Performance")
@@ -190,36 +191,25 @@ with st.sidebar:
     
     # Date filter for selecting month and year
     if not df.empty and 'tanggal' in df.columns:
-        # Extract unique months and years from 'tanggal' column
-        df['tanggal'] = pd.to_datetime(df['tanggal'], errors='coerce')
-        df['month_year'] = df['tanggal'].dt.strftime('%Y-%m')
-        unique_months = sorted(df['month_year'].dropna().unique(), reverse=True)
-        
-        # Map months to Indonesian names
-        month_map = {
-            '01': 'Januari', '02': 'Februari', '03': 'Maret', '04': 'April',
-            '05': 'Mei', '06': 'Juni', '07': 'Juli', '08': 'Agustus',
-            '09': 'September', '10': 'Oktober', '11': 'November', '12': 'Desember'
-        }
-        period_options = [
-            f"{month_map[month.split('-')[1]]} {month.split('-')[0]}" 
-            for month in unique_months
-        ]
+        # Extract unique periods from 'tanggal' column
+        unique_periods = sorted(df['tanggal'].dropna().unique(), reverse=True)
         
         # Set default to current month and year
-        current_month_year = datetime.now().strftime('%Y-%m')
-        current_month = month_map[current_month_year.split('-')[1]]
-        default_period = f"{current_month} {current_month_year.split('-')[0]}"
+        current_month_year = datetime.now().strftime('%B %Y').title()  # e.g., "July 2025"
+        month_map = {
+            'January': 'Januari', 'February': 'Februari', 'March': 'Maret', 'April': 'April',
+            'May': 'Mei', 'June': 'Juni', 'July': 'Juli', 'August': 'Agustus',
+            'September': 'September', 'October': 'Oktober', 'November': 'November', 'December': 'Desember'
+        }
+        current_month = month_map.get(current_month_year.split()[0], current_month_year.split()[0])
+        default_period = f"{current_month} {current_month_year.split()[1]}"
         
-        # Ensure default period is in period_options, else select the most recent
-        default_index = period_options.index(default_period) if default_period in period_options else 0
-        selected_period = st.selectbox("Select Period", period_options, index=default_index)
+        # Ensure default period is in unique_periods, else select the most recent
+        default_index = unique_periods.index(default_period) if default_period in unique_periods else 0
+        selected_period = st.selectbox("Select Period", unique_periods, index=default_index)
         
         # Filter data by selected period
-        selected_month, selected_year = selected_period.split()
-        selected_month_num = list(month_map.keys())[list(month_map.values()).index(selected_month)]
-        selected_month_year = f"{selected_year}-{selected_month_num}"
-        filtered_df = df[df['month_year'] == selected_month_year]
+        filtered_df = df[df['tanggal'] == selected_period]
     else:
         st.warning("No valid date data available for filtering.")
         filtered_df = df
