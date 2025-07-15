@@ -97,6 +97,9 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Function to create a metric card
+# [Previous imports and CSS remain unchanged]
+
+# Function to create a metric card (unchanged)
 def metric_card(label, value, trend):
     return f"""
     <div class="metric-card">
@@ -106,7 +109,7 @@ def metric_card(label, value, trend):
     </div>
     """
 
-# Function to create sales scorecard
+# Function to create sales scorecard (unchanged)
 def sales_scorecard(name, cluster, kode_sf, kode_sap, gmail):
     return f"""
     <div style='
@@ -129,7 +132,7 @@ def sales_scorecard(name, cluster, kode_sf, kode_sap, gmail):
     </div>
     """
 
-# Function to create styled progress info
+# Function to create styled progress info (unchanged)
 def styled_progress_info(title, actual, target, unit="hari"):
     actual_num = pd.to_numeric(actual, errors='coerce')
     target_num = pd.to_numeric(target, errors='coerce')
@@ -145,7 +148,7 @@ def styled_progress_info(title, actual, target, unit="hari"):
     </div>
     """
 
-# Function to create custom progress bar
+# Function to create custom progress bar (unchanged)
 def custom_progress_bar(label, actual, target, emoji="🚶"):
     actual_num = pd.to_numeric(actual, errors='coerce')
     target_num = pd.to_numeric(target, errors='coerce')
@@ -159,12 +162,12 @@ def load_data_from_gsheet():
     sheet_name = "KPI"
     url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/gviz/tq?tqx=out:csv&sheet={sheet_name}"
     try:
-        df = pd.read_csv(url, parse_dates=["tanggal"])
+        df = pd.read_csv(url)
         required_columns = [
             'tanggal', 'Cluster', 'nama_sales', 'kode_sf', 'kode_sap', 'gmail',
             'absensi', 'target_absen', '%absen',
             'target_sa', 'aktual_sa', '%SA', 'target_fv', 'aktual_fv', '%VF',
-            'total_outlet_bulan', 'jumlah_kunjungan_outlet', '%kunjungan',
+            'total_target_ngrs', 'realisasi_ngrs', '%kunjungan',
             'Target_outletbaru', 'total_outlet_baru', '%outletbaru',
             'skor_total', 'target_skor', 'reward'
         ]
@@ -180,7 +183,6 @@ def load_data_from_gsheet():
 
 df = load_data_from_gsheet()
 
-# Sidebar
 # Sidebar
 with st.sidebar:
     st.image("mmpp.png", caption="Sales Dashboard Logo")
@@ -202,7 +204,7 @@ with st.sidebar:
             'September': 'September', 'October': 'Oktober', 'November': 'November', 'December': 'Desember'
         }
         current_month = month_map.get(current_month_year.split()[0], current_month_year.split()[0])
-        default_period = f"{current_month} {current_month_year.split()[1]}"
+        default_period = f"{current_month} {current_month_year.split1}"
         
         # Ensure default period is in unique_periods, else select the most recent
         default_index = unique_periods.index(default_period) if default_period in unique_periods else 0
@@ -237,7 +239,7 @@ if page == "Individual Dashboard":
                 kode_sf = row['kode_sf'] if 'kode_sf' in row and pd.notnull(row['kode_sf']) else '-'
                 kode_sap = row['kode_sap'] if 'kode_sap' in row and pd.notnull(row['kode_sap']) else '-'
                 gmail = row['gmail'] if 'gmail' in row and pd.notnull(row['gmail']) else '-'
-                st.markdown(sales_scorecard(row['nama_sales'], row['Cluster'], row['kode_sf'], row['kode_sap'], row['gmail']), unsafe_allow_html=True)
+                st.markdown(sales_scorecard(row['nama_sales'], row['Cluster'], kode_sf, kode_sap, gmail), unsafe_allow_html=True)
                 
                 # Assign variables with proper column checks
                 absensi = row['absensi'] if 'absensi' in row else 0
@@ -246,8 +248,8 @@ if page == "Individual Dashboard":
                 aktual_sa = row['aktual_sa'] if 'aktual_sa' in row else 0
                 target_fv = row['target_fv'] if 'target_fv' in row and pd.notnull(row['target_fv']) and row['target_fv'] != 0 else 1
                 aktual_fv = row['aktual_fv'] if 'aktual_fv' in row else 0
-                total_outlet_bulan = row['total_outlet_bulan'] if 'total_outlet_bulan' in row and pd.notnull(row['total_outlet_bulan']) and row['total_outlet_bulan'] != 0 else 1
-                jumlah_kunjungan_outlet = row['jumlah_kunjungan_outlet'] if 'jumlah_kunjungan_outlet' in row else 0
+                total_target_ngrs = row['total_target_ngrs'] if 'total_target_ngrs' in row and pd.notnull(row['total_target_ngrs']) and row['total_target_ngrs'] != 0 else 1
+                realisasi_ngrs = row['realisasi_ngrs'] if 'realisasi_ngrs' in row else 0
                 Target_outletbaru = row['Target_outletbaru'] if 'Target_outletbaru' in row and pd.notnull(row['Target_outletbaru']) and row['Target_outletbaru'] != 0 else 1
                 total_outlet_baru = row['total_outlet_baru'] if 'total_outlet_baru' in row else 0
                 skor_total = row['skor_total'] if 'skor_total' in row else 0
@@ -270,8 +272,8 @@ if page == "Individual Dashboard":
                     custom_progress_bar("VF Achievement", aktual_fv, target_fv)
                 
                 with col2:
-                    st.markdown(styled_progress_info("Kunjungan Outlet", jumlah_kunjungan_outlet, total_outlet_bulan, "outlet"), unsafe_allow_html=True)
-                    custom_progress_bar("Kunjungan Outlet", jumlah_kunjungan_outlet, total_outlet_bulan)
+                    st.markdown(styled_progress_info("Realisasi NGRS", realisasi_ngrs, total_target_ngrs, "unit"), unsafe_allow_html=True)
+                    custom_progress_bar("Realisasi NGRS", realisasi_ngrs, total_target_ngrs)
                     st.markdown(styled_progress_info("Outlet Baru", total_outlet_baru, Target_outletbaru, "outlet"), unsafe_allow_html=True)
                     custom_progress_bar("Outlet Baru", total_outlet_baru, Target_outletbaru)
                             
@@ -291,12 +293,7 @@ if page == "Individual Dashboard":
                 # Display reward and date
                 st.write(f"Reward: **Rp {reward if pd.notnull(reward) else 0:,.0f}**".replace(",", "."))
                 tanggal_str = str(row['tanggal']) if pd.notnull(row['tanggal']) else '-'
-                try:
-                    tanggal_dt = pd.to_datetime(tanggal_str)
-                    tanggal_formatted = tanggal_dt.strftime('%Y-%m-%d')
-                except (ValueError, TypeError):
-                    tanggal_formatted = tanggal_str
-                st.markdown(f"📅 Periode Akhir Tanggal: **{tanggal_formatted}**")
+                st.markdown(f"📅 Periode Akhir Tanggal: **{tanggal_str}**")
         else:
             st.warning("No sales person found with the provided Gmail for the selected period.")
     else:
