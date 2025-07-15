@@ -136,14 +136,18 @@ def sales_scorecard(name, cluster, kode_sf, kode_sap, gmail):
 def styled_progress_info(title, actual, target, unit="hari"):
     actual_num = pd.to_numeric(actual, errors='coerce')
     target_num = pd.to_numeric(target, errors='coerce')
+    # Debug print to check raw values (remove in production)
+    # print(f"Title: {title}, Actual: {actual_num}, Target: {target_num}")
     percent = (actual_num / target_num * 100 if target_num and pd.notnull(target_num) and target_num != 0 else 0)
+    # Round to 2 decimal places to ensure small percentages are visible
+    percent = round(percent, 2)
     color = "#10B981" if percent >= 100 else "#3B82F6"
     return f"""
     <div style='margin-bottom: 0.5em;'>
         <div style='font-size: 1.1em; font-weight: bold; color: #1E3A8A;'>{title}</div>
         <div style='font-size: 0.95em; color: #374151;'>
             <span style='font-weight: 600; color: {color};'>{actual if pd.notnull(actual) else 0}</span> dari <b>{target if pd.notnull(target) else 0}</b> {unit} 
-            <span style='float: right; color: {color};'>({percent:.2f}%)</span>
+            <span style='float: right; color: {color};'>({percent}%)</span>
         </div>
     </div>
     """
