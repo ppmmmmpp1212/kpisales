@@ -184,6 +184,7 @@ def load_data_from_gsheet():
 df = load_data_from_gsheet()
 
 # Sidebar
+# Sidebar
 with st.sidebar:
     st.image("mmpp.png", caption="Sales Dashboard Logo")
     st.title("📈 Sales Performance")
@@ -204,7 +205,7 @@ with st.sidebar:
             'September': 'September', 'October': 'Oktober', 'November': 'November', 'December': 'Desember'
         }
         current_month = month_map.get(current_month_year.split()[0], current_month_year.split()[0])
-        default_period = f"{current_month} {current_month_year.split1}"
+        default_period = f"{current_month} {current_month_year.split()[1]}"
         
         # Ensure default period is in unique_periods, else select the most recent
         default_index = unique_periods.index(default_period) if default_period in unique_periods else 0
